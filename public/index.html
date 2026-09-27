@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Cookie RNG 2 – rolle seltene Kekse, sammle alle 520 Einträge, backe Ausrüstung und kletter in der Rangliste nach oben.">
+<meta name="theme-color" content="#1b120d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Cookie RNG 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+:root{
+  color-scheme: dark;
+  --ground:#1b120d; --surface:#261912; --raised:#33231a; --raised2:#3d2a1f; --line:#4a3326;
+  --text:#f7eadb; --muted:#b89c86; --faint:#8a705d;
+  --caramel:#f0a24a; --caramel-deep:#b8661d; --dough:#e6c38e;
+  --good:#8fcf7a; --bad:#e5604f;
+  --tray:#2c2522; --tray-dot:#3f3632;
+  --display:"Bagel Fat One","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ground)}
+body{color:var(--text);font-family:var(--body);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:0 60px;min-height:100%;
+  background-image:radial-gradient(ellipse at 50% -10%,rgba(240,162,74,.10),transparent 60%);}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--caramel);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* Header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding-block:18px 12px}
+.brand{display:flex;align-items:baseline;gap:8px}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,40px);line-height:1;margin:0;letter-spacing:.5px;color:var(--dough)}
+.brand .two{font-family:var(--display);font-size:clamp(34px,6vw,50px);line-height:.8;color:var(--caramel);transform:rotate(-8deg);display:inline-block;text-shadow:0 3px 0 var(--caramel-deep)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:flex;flex-direction:column;gap:1px;padding:6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:84px}
+.chip small{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.chip b{font-family:var(--mono);font-weight:500;font-size:14px}
+.iconbtn{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:700;font-size:13px}
+.iconbtn:hover{background:var(--raised)}
+
+/* Tabs */
+.tabs-scroll{overflow-x:auto;margin-bottom:18px;scrollbar-width:none}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);min-width:max-content}
+.tab{background:none;border:0;padding:10px 14px 11px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{color:var(--dough);border-bottom-color:var(--caramel)}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--caramel);margin-left:6px;vertical-align:2px}
+
+h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0 0 4px;color:var(--dough);text-wrap:balance}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 10px;font-weight:800}
+.lead{color:var(--muted);margin:0 0 18px;max-width:65ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+
+/* Roll tab */
+.rollgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:860px){.rollgrid{grid-template-columns:1fr}}
+.stage{display:flex;flex-direction:column;align-items:center;gap:16px}
+.tray{position:relative;width:100%;max-width:560px;aspect-ratio:16/10;border-radius:22px;background-color:var(--tray);
+  background-image:radial-gradient(circle,var(--tray-dot) 1.6px,transparent 2px);background-size:18px 18px;background-position:9px 9px;
+  box-shadow:inset 0 0 0 6px #3a322e,inset 0 0 0 7px #1e1917,inset 0 10px 30px rgba(0,0,0,.5),0 18px 40px rgba(0,0,0,.35);
+  display:grid;place-items:center;overflow:hidden}
+.tray .rays{position:absolute;inset:-50%;opacity:0;transition:opacity .4s;
+  background:repeating-conic-gradient(from 0deg,var(--ray,#f0a24a) 0 8deg,transparent 8deg 24deg);animation:spin 14s linear infinite;
+  mask-image:radial-gradient(circle,#000 0,transparent 55%);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 55%)}
+.tray.lit .rays{opacity:.35}
+.tray .tag{position:absolute;top:14px;left:16px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.08em}
+.tray .tag2{position:absolute;bottom:12px;right:16px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+#stageCookie{position:relative;width:92%;display:flex;justify-content:center;align-items:center;gap:3%;padding-bottom:30px}
+#stageCookie .slot{position:relative;flex:none;width:var(--sz,42%);max-width:210px;aspect-ratio:1;transition:width .25s}
+#stageCookie .slot .ck{width:100%;height:100%}
+#stageCookie .slot.best{transform:scale(1.1);z-index:2}
+#stageCookie .slot.glow::before{content:"";position:absolute;inset:-14%;border-radius:50%;background:radial-gradient(circle,var(--gc) 0,transparent 68%);opacity:.55;pointer-events:none}
+#stageCookie .slot .lbl{position:absolute;left:50%;top:100%;transform:translate(-50%,6px);display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;text-shadow:0 1px 2px #000}
+#stageCookie .slot .lbl .badge{font-size:9px;padding:1px 5px;margin:0;vertical-align:0}
+#stageCookie .slot.best .lbl{transform:translate(-50%,6px) scale(.91)}
+#stageCookie .lbl .bs{display:flex;gap:3px}
+#stageCookie.shuffle .ck{animation:wob .12s linear infinite}
+#stageCookie.shuffle .slot:nth-child(even) .ck{animation-delay:-.06s}
+#stageCookie.pop .ck{animation:pop .45s cubic-bezier(.2,1.6,.4,1) both}
+#stageCookie.pop .slot:nth-child(2) .ck{animation-delay:.04s}#stageCookie.pop .slot:nth-child(3) .ck{animation-delay:.08s}#stageCookie.pop .slot:nth-child(4) .ck{animation-delay:.12s}#stageCookie.pop .slot:nth-child(5) .ck{animation-delay:.16s}
+@keyframes wob{0%{transform:rotate(-6deg) scale(.96)}50%{transform:rotate(6deg) scale(1)}100%{transform:rotate(-6deg) scale(.96)}}
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.result{width:100%;max-width:560px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:end;min-height:64px;padding:12px 16px;border-radius:12px;background:var(--raised);border:1px solid var(--line)}
+.result .nm{font-family:var(--display);font-size:24px;line-height:1.1;color:var(--text)}
+.result .rt{font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.result .od{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:right}
+.result .extra{grid-column:1/-1;font-size:12.5px;color:var(--muted)}
+.badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--caramel);color:#2a1606;margin-left:6px;vertical-align:3px}
+.badge.sh{background:linear-gradient(90deg,#ff9ad5,#9fd8ff,#fff29a);color:#221}
+
+.rollbtn{font-family:var(--display);font-size:30px;letter-spacing:.5px;color:#2a1606;background:var(--caramel);border:0;border-radius:18px;padding:14px 64px 16px;
+  box-shadow:0 6px 0 var(--caramel-deep),0 10px 24px rgba(240,162,74,.25);transition:transform .06s,box-shadow .06s}
+.rollbtn:active,.rollbtn.press{transform:translateY(4px);box-shadow:0 2px 0 var(--caramel-deep),0 4px 10px rgba(240,162,74,.2)}
+.rollbtn:disabled{filter:saturate(.5) brightness(.8);cursor:default}
+body.pulse .rollbtn:not(:disabled){animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 6px 0 var(--caramel-deep),0 10px 24px rgba(240,162,74,.2)}50%{box-shadow:0 6px 0 var(--caramel-deep),0 10px 40px rgba(240,162,74,.55)}}
+.controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;flex-wrap:wrap}
+.seg button{background:none;border:0;border-radius:7px;padding:7px 12px;font-weight:700;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--raised2);color:var(--text)}
+.xin{width:78px;background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-family:var(--mono)}
+.autobtn{background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-weight:800}
+.autobtn[aria-pressed="true"]{background:#3b2a12;border-color:var(--caramel);color:var(--caramel)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:center;color:var(--muted);font-size:13px}
+.meta b{color:var(--text);font-family:var(--mono);font-weight:500}
+.blessbar{width:100%;max-width:560px;height:6px;border-radius:4px;background:var(--surface);overflow:hidden}
+.blessbar i{display:block;height:100%;background:linear-gradient(90deg,var(--caramel),#fff1a8);width:0}
+.effects{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.eff{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:#2f2413;border:1px solid #6b4a1c;color:var(--dough)}
+.eff .num{color:var(--caramel)}
+
+.side{display:flex;flex-direction:column;gap:14px}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:380px;overflow:auto}
+.log li{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:4px 6px;border-radius:8px;font-size:13px}
+.log li:nth-child(odd){background:rgba(255,255,255,.02)}
+.log li .ck{width:30px;height:30px}
+.log .o{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.log .empty{color:var(--faint);display:block;padding:8px 0}
+.oddstable{width:100%;border-collapse:collapse;font-size:13px}
+.oddstable td{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.oddstable td:last-child{text-align:right;font-family:var(--mono);color:var(--muted)}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.row-between h3{margin:0}
+select.sm{background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:12.5px}
+
+/* Cookies */
+.ck{position:relative;display:inline-block;flex:none}
+.ck{background-size:contain;background-repeat:no-repeat;background-position:center}
+.ck.sh{filter:hue-rotate(155deg) saturate(1.5) brightness(1.08)}
+.ck.sh::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,transparent 60%);background-size:250% 100%;animation:shimmer 2.4s linear infinite;mix-blend-mode:overlay}
+.ck.unk{filter:brightness(0) opacity(.45)}
+@keyframes shimmer{0%{background-position:150% 0}100%{background-position:-100% 0}}
+
+/* Book / grids */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.tiersec{margin-bottom:26px}
+.tierhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.tierhead .tn{font-family:var(--display);font-size:20px}
+.tierhead .ti{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px}
+.cell{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;overflow:hidden}
+.cell:hover{background:var(--raised)}
+.cell .ck{width:72px;height:72px}
+.cell .n{font-weight:700;font-size:13px;line-height:1.2;min-height:2.4em;display:flex;align-items:center}
+.cell .o{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cell .cnt{position:absolute;top:6px;right:8px;font-family:var(--mono);font-size:11px;color:var(--dough)}
+body.cardanim .cell.cosmic.have::before{content:"";position:absolute;inset:0;z-index:0;opacity:.22;background:linear-gradient(120deg,#ff5ad9,#5ad9ff,#fff29a,#b07aff,#ff5ad9);background-size:300% 300%;animation:flow 6s linear infinite}
+.cell>*{position:relative;z-index:1}
+@keyframes flow{0%{background-position:0 50%}100%{background-position:300% 50%}}
+
+/* Inventory */
+.invlist{display:flex;flex-direction:column;gap:6px}
+.invrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.invrow .ck{width:44px;height:44px}
+.invrow .n{font-weight:700}
+.invrow .s{font-size:12px;color:var(--muted)}
+.invrow .c{font-family:var(--mono);font-size:14px;text-align:right}
+.btn{background:var(--raised2);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-weight:700;font-size:13px}
+.btn:hover:not(:disabled){border-color:var(--caramel)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.pri{background:var(--caramel);color:#2a1606;border-color:var(--caramel)}
+.btn.danger{background:#4a1f18;border-color:#7a3226;color:#ffc9bd}
+.potgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px}
+.pot{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.pot .ic{width:40px;height:40px}
+.pot .n{font-weight:700;font-size:14px}
+.pot .s{font-size:12px;color:var(--muted)}
+
+/* Shop */
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:26px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.card .top2{display:flex;gap:12px;align-items:center}
+.card .ic{width:46px;height:46px;flex:none}
+.card .n{font-weight:800;font-size:15px}
+.card .s{font-size:12.5px;color:var(--muted)}
+.card .lv{display:flex;gap:3px}
+.card .lv i{flex:1;height:5px;border-radius:3px;background:var(--raised2)}
+.card .lv i.on{background:var(--caramel)}
+.card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+.price{font-family:var(--mono);font-size:14px;color:var(--dough)}
+.codebox{display:flex;gap:8px;flex-wrap:wrap}
+.tin{background:var(--ground);border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:0;flex:1 1 180px}
+
+/* Stats */
+.statgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.stat b{font-family:var(--mono);font-weight:500;font-size:19px}
+.tscroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px;min-width:480px}
+table.t th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+table.t td.r,table.t th.r{text-align:right;font-family:var(--mono)}
+.achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.ach{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;opacity:.55}
+.ach.done{opacity:1;border-color:#6b4a1c;background:#2b1f14}
+.ach .medal{width:34px;height:34px;border-radius:50%;background:var(--raised2);display:grid;place-items:center;font-family:var(--display);font-size:15px;color:var(--faint)}
+.ach.done .medal{background:radial-gradient(circle at 35% 30%,#fff1a8,var(--caramel) 60%,var(--caramel-deep));color:#3a1e05}
+.ach .n{font-weight:800;font-size:13.5px}
+.ach .s{font-size:12px;color:var(--muted)}
+
+/* Rebirth */
+.rbhero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;margin-bottom:20px}
+@media (max-width:620px){.rbhero{grid-template-columns:1fr}}
+.rbring{width:170px;height:170px;border-radius:50%;display:grid;place-items:center;text-align:center;
+  background:radial-gradient(circle,var(--surface) 58%,transparent 59%),conic-gradient(var(--caramel),#fff1a8,var(--caramel-deep),var(--caramel));animation:spin 30s linear infinite}
+.rbring>div{animation:spin 30s linear infinite reverse}
+.rbring b{font-family:var(--display);font-size:34px;color:var(--dough);display:block;line-height:1}
+.rbring small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.tierchecks{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-block:12px 20px}
+.tc{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:9px;background:var(--surface);border:1px solid var(--line);font-size:13px}
+.tc .num{color:var(--muted);font-size:12px}
+.tc.ok{border-color:#3f6b34}
+.tc.ok .num{color:var(--good)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.cols2{grid-template-columns:1fr}}
+.cols2 ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:13.5px}
+
+/* Leaderboard */
+.lbme{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-block:12px 18px}
+.lbrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin-bottom:5px}
+.lbrow.me{border-color:var(--caramel)}
+.lbrow .rk{font-family:var(--display);font-size:18px;color:var(--muted);text-align:center}
+.lbrow:nth-child(1) .rk{color:#ffd76a}.lbrow:nth-child(2) .rk{color:#d8dde6}.lbrow:nth-child(3) .rk{color:#e3a36b}
+.lbrow .nm{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbrow .sub{font-size:12px;color:var(--muted)}
+.lbrow .v{font-family:var(--mono);text-align:right}
+.note{font-size:12.5px;color:var(--muted);max-width:70ch}
+
+/* Modal, toast, cutscene */
+.overlay{position:fixed;inset:0;background:rgba(10,6,4,.72);display:grid;place-items:center;padding:16px;z-index:50;backdrop-filter:blur(3px)}
+.modal{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.modal .mh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.modal .mh h2{margin:0;font-size:22px}
+.x{background:none;border:0;font-size:22px;color:var(--muted);padding:2px 8px}
+.setrow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.setrow .l b{display:block;font-size:14px}
+.setrow .l span{font-size:12.5px;color:var(--muted)}
+.sw{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:12px;background:var(--raised2);position:relative;flex:none;cursor:pointer;border:1px solid var(--line)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:left .15s}
+.sw:checked{background:var(--caramel-deep)}
+.sw:checked::after{left:20px;background:#fff3e0}
+.setsec{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--caramel);font-weight:800;margin:16px 0 2px}
+.detail{display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center}
+.detail .ck{width:120px;height:120px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-family:var(--mono)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+
+.toasts{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:60;pointer-events:none;max-width:calc(100% - 32px)}
+.toast{background:var(--raised);border:1px solid var(--line);border-left:4px solid var(--caramel);border-radius:10px;padding:10px 14px;font-size:13.5px;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:tin .25s ease-out;max-width:340px}
+.toast b{display:block}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+
+.cut{position:fixed;inset:0;z-index:70;display:grid;place-items:center;overflow:hidden;background:#07040a;cursor:pointer}
+.cut .bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,var(--cc) 0,transparent 55%);opacity:.25;transition:opacity .6s}
+.cut .rays2{position:absolute;inset:-60%;opacity:0;background:repeating-conic-gradient(var(--cc) 0 6deg,transparent 6deg 18deg);animation:spin 9s linear infinite;
+  mask-image:radial-gradient(circle,#000,transparent 50%);-webkit-mask-image:radial-gradient(circle,#000,transparent 50%);transition:opacity .5s}
+.cut.rev .rays2{opacity:.45}.cut.rev .bg{opacity:.55}
+.cut .core{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:16px}
+.cut .orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff,var(--cc) 45%,transparent 72%);animation:throb .5s ease-in-out infinite alternate;filter:blur(1px)}
+@keyframes throb{from{transform:scale(.8)}to{transform:scale(1.08)}}
+.cut .stars{font-family:var(--display);font-size:22px;letter-spacing:6px;color:var(--cc);min-height:1.3em}
+.cut .stars span{display:inline-block;animation:tin .3s ease-out both}
+.cut .pre{font-family:var(--mono);color:#cbbfd8;font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.cut .ckbig{width:min(240px,60vw);height:min(240px,60vw);animation:rev .8s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes rev{0%{transform:scale(0) rotate(-120deg)}100%{transform:scale(1) rotate(0)}}
+.cut .cn{font-family:var(--display);font-size:clamp(30px,7vw,52px);line-height:1;color:#fff;text-shadow:0 0 30px var(--cc);animation:tin .5s .2s both}
+.cut .cr{font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--cc);animation:tin .5s .35s both}
+.cut .co{font-family:var(--mono);color:#e6dcef;animation:tin .5s .5s both}
+.cut .skip{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:8px 14px;font-weight:700}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:40;background:var(--cc);opacity:0;animation:flash .6s ease-out}
+@keyframes flash{0%{opacity:.35}100%{opacity:0}}
+
+.rar{font-weight:800}
+.prism-text{background:linear-gradient(90deg,#ff7a7a,#ffd27a,#9dff8a,#7adfff,#c79bff,#ff7ad9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.foot-note{margin-top:40px;color:var(--faint);font-size:12px;text-align:center}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
+@media (max-width:520px){.rollbtn{padding:12px 44px 14px;font-size:26px}.chip{min-width:70px;padding:5px 9px}.invrow{grid-template-columns:40px minmax(0,1fr) auto}.invrow .btn{grid-column:2/-1;justify-self:start}}
+
+/* ===== v3 additions ===== */
+[hidden]{display:none!important}
+.ck.gd{filter:sepia(1) saturate(3.2) hue-rotate(-8deg) brightness(1.12) drop-shadow(0 0 5px rgba(247,191,63,.8))}
+.ck.burnt{filter:brightness(.48) saturate(.7) contrast(1.25) sepia(.3)}
+.ck.big{transform:scale(1.2)}
+.ck.unk{filter:brightness(0) opacity(.45)!important;transform:none}
+.badge.gd{background:linear-gradient(90deg,#fff1a8,#f7bf3f);color:#3a2605}
+.badge.big{background:#62b3f0;color:#08243a}
+.badge.burnt{background:#4a2c1c;color:#f0c9a8;border:1px solid #7a4a30}
+.badge.ev{background:#ff9f43;color:#3a1a02}
+
+/* Live feed ticker */
+.ticker{display:flex;align-items:center;gap:10px;margin:-8px 0 16px;padding:6px 10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:34px}
+.ticker .live{flex:none;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#ff7a6a;display:flex;align-items:center;gap:6px}
+.ticker .live::before{content:"";width:7px;height:7px;border-radius:50%;background:#ff5a4a;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.ticker .track{flex:1;overflow:hidden;min-width:0;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.ticker .rail{display:inline-flex;gap:28px;white-space:nowrap;animation:rail 60s linear infinite;padding-left:8px;font-size:13px}
+.ticker .rail span b{font-weight:800}
+.ticker .rail .t{color:var(--faint);font-family:var(--mono);font-size:11.5px}
+@keyframes rail{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker .rail.static{animation:none}
+
+/* Ticker: ein Fund zur Zeit, sanft überblendet */
+.ticker .tslot{position:relative;flex:1;min-width:0;height:24px;overflow:hidden}
+.ticker .item{position:absolute;inset:0;display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:13px;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s;will-change:transform,opacity}
+.ticker .item.enter{transform:translateY(100%);opacity:0}
+.ticker .item.leave{transform:translateY(-100%);opacity:0}
+.ticker .item .ck{width:22px;height:22px}
+.ticker .item .txt{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ticker .item .t{color:var(--faint);font-family:var(--mono);font-size:11.5px;flex:none}
+.ticker .item.idle{color:var(--faint)}
+.ticker .tmore{flex:none;font-size:11px;color:var(--faint)}
+/* Glück-Regler */
+.luckctl{width:100%;max-width:560px;display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.luckctl input[type=range]{width:100%;min-width:0;accent-color:var(--caramel)}
+.luckctl .num{min-width:8.5em;text-align:right}
+.luckctl.on .num{color:var(--caramel)}
+.luckctl .btn{padding:4px 10px;font-size:12px}
+.nf-warn{font-size:12px;color:var(--caramel);margin-top:6px}
+.nf-warn button{margin-top:6px}
+/* Event bar */
+.evbar{width:100%;max-width:560px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:13.5px}
+.evbar .en{font-weight:800}
+.evbar .ed{color:var(--muted);font-size:12.5px}
+.evbar .et{font-family:var(--mono);font-size:13px;white-space:nowrap}
+.evbar.on{border-color:var(--evc);background:linear-gradient(100deg,color-mix(in srgb,var(--evc) 22%,var(--surface)),var(--surface) 70%)}
+.evbar.on .en{color:var(--evc)}
+.evbar .tagx{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:var(--evc);color:#1b120d;margin-right:6px;vertical-align:1px}
+.tray.ev{box-shadow:inset 0 0 0 6px #3a322e,inset 0 0 0 7px #1e1917,inset 0 10px 30px rgba(0,0,0,.5),0 0 0 2px var(--evc),0 0 50px -8px var(--evc)}
+.tray.ev::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 120%,var(--evc),transparent 60%);opacity:.18}
+.tray .glowlayer{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,var(--glow,#f0a24a),transparent 58%);opacity:0;transition:opacity .15s,background .12s}
+.tray.suspense .glowlayer{opacity:.5}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.nearmiss{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);z-index:6;font-family:var(--display);font-size:clamp(20px,4vw,30px);white-space:nowrap;pointer-events:none;opacity:0;text-shadow:0 2px 12px #000}
+.nearmiss.show{animation:nm 1.6s ease-out}
+@keyframes nm{0%{opacity:0;transform:translate(-50%,-30%) scale(.8)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%)}}
+.tray.shake{animation:shake .45s}
+body.bigshake .wrap{animation:shake .6s}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-6px,2px)}40%,60%{transform:translate(6px,-1px)}}
+.auraCk{position:absolute;top:10px;right:12px;width:34px;height:34px;z-index:4;display:flex;flex-direction:column;align-items:center}
+.auraCk .ck{width:34px;height:34px;animation:spin 12s linear infinite}
+.auraCk small{font-size:8.5px;letter-spacing:.14em;font-weight:800;color:var(--faint);margin-top:2px}
+.tray.aura{--auc:#f0a24a}
+.tray.aura::before{content:"";position:absolute;inset:7px;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 26px -6px var(--auc);z-index:1}
+.brandaura{width:30px;height:30px;align-self:center}
+.brandaura .ck{width:30px;height:30px}
+
+/* Barometer */
+.baro{width:100%;max-width:560px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.baro .bar{height:8px;border-radius:5px;background:var(--surface);overflow:hidden;border:1px solid var(--line)}
+.baro .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#62b3f0,#b98cff,#ff7ad9);transition:width .3s}
+.baro.full .bar i{animation:blink .8s infinite}
+.blessrow{width:100%;max-width:560px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.blessrow .blessbar{max-width:none}
+
+/* Quests & next find */
+.quest{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.quest:last-child{border-bottom:0}
+.quest .qt{font-weight:700;font-size:13.5px}
+.quest .qr{font-size:11.5px;color:var(--muted)}
+.quest .qb{grid-column:1/-1;height:5px;border-radius:3px;background:var(--raised2);overflow:hidden}
+.quest .qb i{display:block;height:100%;background:var(--caramel)}
+.quest.done .qb i{background:var(--good)}
+.quest.claimed{opacity:.5}
+.streak{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.streak b{color:var(--caramel);font-family:var(--mono)}
+.nextfind{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center}
+.nextfind .ck{width:56px;height:56px}
+.nextfind .t1{font-weight:800}
+.nextfind .t2{font-size:12.5px;color:var(--muted)}
+.nextfind .pb{height:5px;border-radius:3px;background:var(--raised2);overflow:hidden;margin-top:6px}
+.nextfind .pb i{display:block;height:100%;background:linear-gradient(90deg,var(--caramel),#fff1a8)}
+
+/* Workshop */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:24px}
+.slotcard{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;padding:12px;background:var(--surface);border:1px dashed var(--line);border-radius:12px}
+.slotcard.on{border-style:solid;border-color:#6b4a1c;background:#2b1f14}
+.slotcard .sl{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800}
+.slotcard .sn{font-weight:800}
+.slotcard .sb{font-size:12px;color:var(--good)}
+.ing{display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.ing div{display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:center}
+.ing .ck{width:22px;height:22px}
+.ing .ok{color:var(--good);font-family:var(--mono)}
+.ing .no{color:var(--bad);font-family:var(--mono)}
+.bonus{font-size:12.5px;color:var(--good);font-weight:700}
+.aurapick{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.aurapick button{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;text-align:center;line-height:1.15}
+.aurapick button[aria-pressed="true"]{border-color:var(--caramel);background:#2b1f14}
+.aurapick .ck{width:44px;height:44px}
+
+/* Talents */
+.talgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:22px}
+.tal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.tal .n{font-weight:800}
+.tal .s{font-size:12.5px;color:var(--muted)}
+.tal .foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.matrix td.c{text-align:center;font-family:var(--mono)}
+.matrix td.ok{color:var(--good)}
+.matrix td.no{color:var(--faint)}
+
+/* Offline summary */
+.offsum{display:flex;flex-direction:column;gap:8px}
+.offsum .big{font-family:var(--display);font-size:34px;color:var(--dough);line-height:1}
+.offrow{display:flex;flex-wrap:wrap;gap:6px}
+.offrow .ck{width:40px;height:40px}
+</style>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>Cookie RNG</h1><span class="two">2</span><span class="brandaura" id="brandAura" title="Deine Aura"></span></div>
+    <div class="chips">
+      <div class="chip"><small>Rolls</small><b id="cRolls">0</b></div>
+      <div class="chip"><small>Sammelbuch</small><b id="cBook">0</b></div>
+      <div class="chip"><small>Glück</small><b id="cLuck">×1,00</b></div>
+      <div class="chip"><small>Krümel</small><b id="cCrumbs">0</b></div>
+      <button class="iconbtn" id="btnSettings">Einstellungen</button>
+    </div>
+  </header>
+
+  <div class="tabs-scroll">
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-tab="roll" aria-selected="true">Rollen</button>
+      <button class="tab" data-tab="inv" aria-selected="false">Inventar</button>
+      <button class="tab" data-tab="book" aria-selected="false">Sammelbuch</button>
+      <button class="tab" data-tab="craft" aria-selected="false">Werkstatt</button>
+      <button class="tab" data-tab="shop" aria-selected="false">Bäckerei</button>
+      <button class="tab" data-tab="stats" aria-selected="false">Statistiken</button>
+      <button class="tab" data-tab="rebirth" aria-selected="false">Rebirth</button>
+      <button class="tab" data-tab="lb" aria-selected="false">Rangliste</button>
+    </nav>
+  </div>
+
+  <div class="ticker" id="ticker" hidden><span class="live">LIVE</span><div class="tslot" id="tickerSlot"></div><span class="tmore" id="tickerMore"></span></div>
+
+  <!-- ROLL -->
+  <section id="tab-roll">
+    <div class="rollgrid">
+      <div class="stage">
+        <div class="evbar" id="evBar"></div>
+        <div class="tray" id="tray">
+          <div class="rays"></div>
+          <div class="glowlayer"></div>
+          <span class="tag">BLECH 01 · 180 °C</span>
+          <span class="tag2" id="trayRoll">#0</span>
+          <div class="auraCk" id="trayAura" hidden></div>
+          <div id="stageCookie"></div>
+          <div class="nearmiss" id="nearMiss"></div>
+          <canvas id="fx"></canvas>
+        </div>
+        <div class="result" id="result"></div>
+        <button class="rollbtn" id="rollBtn">Rollen</button>
+        <div class="controls">
+          <div class="seg" id="modeSeg">
+            <button data-mode="std" aria-pressed="true">Standard</button>
+            <button data-mode="new" aria-pressed="false">Bis Neuentdeckung</button>
+            <button data-mode="x" aria-pressed="false">X-mal</button>
+          </div>
+          <input class="xin" id="xCount" type="number" min="1" max="100000" value="50" aria-label="Anzahl Rolls">
+          <button class="autobtn" id="autoBtn" aria-pressed="false">Auto-Bäcker starten</button>
+        </div>
+        <div class="blessrow"><span>Gesegnet ×10</span><div class="blessbar"><i id="blessFill"></i></div><span class="num" id="mBless">1000</span></div>
+        <div class="baro" id="baro" title="Füllt sich bei jeder Durststrecke ohne Neuentdeckung. Voll: nächster Roll mit ×5 Glück."><span>Glücksbarometer</span><div class="bar"><i id="baroFill"></i></div><span class="num" id="baroPct">0 %</span></div>
+        <div class="luckctl" id="luckCtl" title="Begrenzt dein Grundglück. Nützlich, um häufige Kekse zu finden, die bei sehr hohem Glück nicht mehr auftauchen."><label for="luckRange">Glück-Regler</label><input type="range" id="luckRange" min="0" max="1000" step="1" value="1000"><span class="num" id="luckVal">voll</span><button class="btn" id="luckFull">Voll</button></div>
+        <div class="meta">
+          <span>Glücksroll (×2) in <b id="mLucky">100</b></span>
+          <span><b id="mRps">0</b> Rolls/s · <b id="mRph">0</b> Rolls/h</span>
+        </div>
+        <div class="effects" id="effects"></div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <div class="row-between"><h3>Tagesaufträge</h3><span class="num" id="qReset" style="color:var(--faint);font-size:11.5px"></span></div>
+          <div id="quests"></div>
+        </div>
+        <div class="panel">
+          <h3>Nächster Fund</h3>
+          <div id="nextFind"></div>
+        </div>
+        <div class="panel">
+          <div class="row-between"><h3>Letzte Rolls</h3>
+            <select class="sm" id="logMin" aria-label="Log-Filter">
+              <option value="0">Alle</option><option value="2">ab Selten</option><option value="4">ab Legendär</option><option value="6">ab Göttlich</option>
+            </select></div>
+          <ul class="log" id="log"></ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- INVENTORY -->
+  <section id="tab-inv" hidden>
+    <h2>Inventar</h2>
+    <p class="lead">Tränke aktivieren und doppelte Kekse gegen Krümel verkaufen. Kekse brauchst du auch für Rezepte in der Werkstatt, also nicht alles verkaufen.</p>
+    <h3>Tränke &amp; Items</h3>
+    <div class="potgrid" id="invPots"></div>
+    <div class="toolbar">
+      <select class="sm" id="invTier" aria-label="Seltenheit filtern"></select>
+      <select class="sm" id="invVar" aria-label="Variante filtern"></select>
+      <input class="tin" id="invSearch" placeholder="Keks suchen" style="flex:0 1 200px" aria-label="Keks suchen">
+      <select class="sm" id="invSort" aria-label="Sortierung"><option value="rare">Seltenste zuerst</option><option value="count">Meiste zuerst</option><option value="name">Name</option></select>
+      <span style="flex:1"></span>
+      <button class="btn" id="sellDupes">Duplikate bis Episch verkaufen</button>
+    </div>
+    <div class="invlist" id="invList"></div>
+  </section>
+
+  <!-- BOOK -->
+  <section id="tab-book" hidden>
+    <h2>Sammelbuch</h2>
+    <p class="lead" id="bookLead"></p>
+    <div class="toolbar"><div class="seg" id="bookSeg"></div></div>
+    <div id="book"></div>
+  </section>
+
+  <!-- CRAFT -->
+  <section id="tab-craft" hidden>
+    <h2>Werkstatt</h2>
+    <p class="lead">Aus doppelten Keksen entsteht Ausrüstung mit dauerhaften Boni. Ausrüstung bleibt auch nach einem Rebirth erhalten. Pro Slot trägst du ein Teil.</p>
+    <h3>Ausgerüstet</h3>
+    <div class="slots" id="slots"></div>
+    <h3>Rezepte</h3>
+    <div class="shopgrid" id="recipes"></div>
+    <h3>Aura</h3>
+    <p class="note" style="margin:0 0 12px">Deine Aura leuchtet auf dem Blech, neben deinem Namen und in der Rangliste. Wähle einen deiner besten Funde.</p>
+    <div class="aurapick" id="auraPick"></div>
+  </section>
+
+  <!-- SHOP -->
+  <section id="tab-shop" hidden>
+    <h2>Bäckerei</h2>
+    <p class="lead">Krümel bekommst du bei jedem Roll, je seltener der Keks, desto mehr. Upgrades gelten bis zum nächsten Rebirth.</p>
+    <h3>Upgrades</h3>
+    <div class="shopgrid" id="shopUp"></div>
+    <h3>Tränke &amp; Items</h3>
+    <div class="shopgrid" id="shopPot"></div>
+    <h3>Einlöse-Code</h3>
+    <div class="panel" style="max-width:520px">
+      <form class="codebox" id="codeForm"><input class="tin" id="codeIn" placeholder="Code eingeben" autocomplete="off" aria-label="Code"><button class="btn pri" type="submit">Einlösen</button></form>
+      <p class="note" style="margin:10px 0 0">Tipp: Probier mal <span class="num">KEKS2</span> oder <span class="num">EVENT</span>.</p>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="tab-stats" hidden>
+    <h2>Statistiken</h2>
+    <p class="lead">Aktueller Durchlauf und All-Time-Werte. All-Time bleibt auch nach einem Rebirth erhalten.</p>
+    <div class="statgrid" id="statGrid"></div>
+    <h3>Nach Seltenheit</h3>
+    <div class="tscroll panel" style="padding:4px 8px;margin-bottom:26px"><table class="t" id="tierTable"></table></div>
+    <div class="row-between"><h3>Achievements</h3><span class="num" id="achCount" style="color:var(--muted);font-size:13px"></span></div>
+    <div class="achgrid" id="achGrid"></div>
+  </section>
+
+  <!-- REBIRTH -->
+  <section id="tab-rebirth" hidden>
+    <div class="rbhero">
+      <div class="rbring"><div><b id="rbNow">0</b><small>Talentpunkte</small></div></div>
+      <div>
+        <h2>Rebirth &amp; Talente</h2>
+        <p class="lead" style="margin-bottom:8px">Ein Rebirth setzt deinen Durchlauf zurück und gibt dir Talentpunkte. Jede vollständige Seltenheit bringt 1 Punkt, vollständig schillernd 2 Punkte, vollständig golden, riesig oder verbrannt je 1 Punkt.</p>
+        <p style="margin:0 0 12px">Nächster Rebirth bringt <b class="num" id="rbGain" style="color:var(--caramel)">0</b> Punkte · Rebirths bisher: <b class="num" id="rbCount">0</b></p>
+        <button class="btn pri" id="rbBtn">Rebirth durchführen</button>
+        <span class="note" id="rbReq" style="margin-left:8px"></span>
+      </div>
+    </div>
+    <div class="row-between"><h3>Talentbaum</h3><button class="btn" id="talReset">Talente zurücksetzen</button></div>
+    <div class="talgrid" id="talGrid"></div>
+    <h3>Vollständige Seltenheiten</h3>
+    <div class="tscroll panel" style="padding:4px 8px;margin-bottom:20px"><table class="t matrix" id="rbMatrix"></table></div>
+    <div class="cols2">
+      <div class="panel"><b>Wird zurückgesetzt</b><ul><li>Rolls dieses Durchlaufs</li><li>Inventar und Sammelbuch</li><li>Krümel, Upgrades, Tränke und Effekte</li></ul></div>
+      <div class="panel"><b>Bleibt erhalten</b><ul><li>Talente und Talentpunkte</li><li>Ausrüstung und Aura</li><li>Achievements, Aufträge und Serie</li><li>All-Time-Statistiken und Rangliste</li></ul></div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section id="tab-lb" hidden>
+    <h2>Rangliste</h2>
+    <p class="lead">Gesamt-Score ist die Summe deiner Plätze in fünf Kategorien: Entdeckungen, Rolls, Schillernde, bester Keks und Rebirths. Niedriger ist besser.</p>
+    <div id="lbBody"></div>
+  </section>
+
+  <p class="foot-note">Cookie RNG 2 · Spielstand wird in diesem Browser gespeichert<span id="cloudNote"></span>. <button class="btn" id="footSync" style="margin-left:6px;font-size:12px;padding:4px 10px">Auf anderem Gerät weiterspielen</button></p>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+(()=>{
+"use strict";
+/* ================= Data ================= */
+const TIERS=[
+ {n:"Gewöhnlich",c:"#c9b59a",lo:2,hi:9},
+ {n:"Ungewöhnlich",c:"#8fd67f",lo:10,hi:45},
+ {n:"Selten",c:"#62b3f0",lo:50,hi:220},
+ {n:"Episch",c:"#b98cff",lo:250,hi:1000},
+ {n:"Legendär",c:"#f7bf3f",lo:1200,hi:4800},
+ {n:"Mythisch",c:"#ff6f61",lo:6000,hi:24000},
+ {n:"Göttlich",c:"#fff0a0",lo:30000,hi:120000},
+ {n:"Prismatisch",c:"#ff8fe0",lo:150000,hi:600000,prism:1},
+ {n:"Ätherisch",c:"#9ff3ff",lo:750000,hi:3000000},
+ {n:"Himmlisch",c:"#ffd6f5",lo:4000000,hi:16000000},
+ {n:"Kosmisch",c:"#8f86ff",lo:20000000,hi:80000000},
+ {n:"Unendlich",c:"#ffffff",lo:100000000,hi:1000000000},
+ {n:"Event",c:"#ff9f43"},
+];
+const RAW=[
+"Butterkeks|d9b173|c08a45|dock,Haferkeks|c9a06a|8a6036|oat,Zuckerkeks|f0dcb0|ffffff|sugar,Mürbekeks|e4bf82|b98a4c|crack,Löffelbiskuit|ecc98a|fff4dd|sugar,Vollkornkeks|a9784a|6e4a2a|oat,Knäckekeks|c8a26a|8f6b3d|dock,Zwieback|d69b55|f1d29b|crack",
+"Schokokeks|d2a064|3b2314|chips,Erdnusskeks|c8904e|8a5a2b|crack,Kokosmakrone|f3ead8|c89a5e|dust,Zimtstern|b57a42|ffffff|drizzle,Spekulatius|b0703a|7a4520|dock,Honigtaler|e3a84a|f7d27a|swirl,Rosinenkeks|c99a62|5a2f3c|chips,Mandelkeks|e0bd8a|f5e6c8|nuts",
+"Doppelschoko|5a3420|f3e2c7|chips,Pistazienkeks|c9c98a|7fae4e|nuts,Matcha-Keks|9cbf6a|f5f0e0|chips,Himbeertaler|efc7a2|d8436a|filled,Karamellkeks|d99a4e|f1c27d|drizzle,Lebkuchen|8a4a24|ffffff|drizzle,Nougatkeks|b98457|6b3b20|swirl,Florentiner|d9a441|3b2314|drizzle",
+"Red Velvet|a8233a|f7f1e8|chips,Macaron|f4a6c6|fff0f5|sandwich,S'mores-Keks|c48a4f|ffffff|filled,Tiramisu-Keks|e9d2b0|5a3a22|dust,Blaubeer-Cheesecake|f1e2c4|4a5ab8|filled,Salzkaramell|cf8a3b|ffffff|sugar,Espressokeks|4a2c1c|c9a27a|swirl,Minzschoko|2e7d62|3b2314|chips",
+"Goldkeks|e8b938|fff2a8|facet,Drachenkeks|b7412a|f5b942|scales,Kronenkeks|f0c14b|c2362f|jewels,Phönixkeks|ff7a2e|ffd35a|swirl,Bernsteinkeks|d9892a|fbd28a|facet,Königsmakrone|7e3fb0|f0c14b|sandwich,Löwenkeks|d19a3a|8a4a1a|rays,Sonnentaler|ffcc33|ff8a00|rays",
+"Einhornkeks|f7d6f0|7fdfff|sprinkles,Greifenkeks|c28b4a|5b8fd9|swirl,Kraken-Keks|3a2e6e|d94a8c|dots,Hydra-Keks|2f7a4a|b8e04a|scales,Basiliskenkeks|5b7a2a|e0d04a|eye,Nixenkeks|3fb8c9|f7d6f0|scales,Yeti-Keks|eef4fa|9ab8d6|sugar,Sphinxkeks|d9b066|3a6fb0|eye",
+"Engelskeks|fffaf0|ffe27a|halo,Olymp-Keks|f5f0e6|d9b44a|facet,Heiligenschein|fff6d6|ffd84a|halo,Walhalla-Keks|c9d2dc|e8b938|rays,Zeuskeks|eaf2ff|ffe14a|bolt,Athenekeks|e0e4d0|7a8a5a|eye,Odinkeks|6a7a8a|d9e6f0|dots,Ra-Keks|ffb84a|ff5a2a|rays",
+"Regenbogenkeks|ffe0e0|ff7ad9|prism,Kristallkeks|bfe8ff|ffffff|facet,Spektralkeks|9a7cff|ff7ad9|prism,Diamantkeks|e8fbff|9fe8ff|facet,Opalkeks|f0e6ff|7ae0d0|prism,Prismakeks|ffffff|ff5ad9|prism,Holokeks|c0c8ff|7affd9|prism,Lichtbrecher|fff5c0|7ad0ff|facet",
+"Geisterkeks|e8f4ff|9ff3ff|ghost,Nebelkeks|c8d6e0|ffffff|ghost,Traumkeks|d8c8ff|ff9ad5|ghost,Seelenkeks|a8f0e8|ffffff|ghost,Wolkenkeks|f4f8ff|bfe0ff|ghost,Äther-Makrone|c0f0ff|9ff3ff|ghost,Phantomkeks|b8b0d8|e8d8ff|ghost,Schleierkeks|e8e0f0|ffd6f5|ghost",
+"Sternkeks|1f2a5a|ffe27a|stars,Mondkeks|d8dce8|9aa0b0|craters,Nordlichtkeks|1a3a4a|5affb0|aurora,Kometenkeks|2a1f4a|9fd8ff|stars,Sternschnuppe|3a2a6a|ffd6f5|stars,Polarsternkeks|0f1f3a|ffffff|stars,Zodiakkeks|2a1a3a|f0c14b|stars,Himmelstor|4a3a8a|ffe8a0|halo",
+"Nebula-Keks|3a1a5a|ff5ad9|cosmic,Supernova|5a1a1a|ffb84a|cosmic,Quasarkeks|0a1a3a|5ad9ff|cosmic,Pulsarkeks|1a0a3a|b07aff|cosmic,Galaxiekeks|1a1040|ffd6f5|cosmic,Schwarzes-Loch-Keks|050308|ff8a3a|void,Urknallkeks|2a0a1a|ffffff|cosmic,Dunkle Materie|0a0a14|6c63ff|void",
+"Unendlichkeitskeks|ffffff|000000|void,Zeitkeks|e0d0a0|3a2a10|swirl,Paradoxkeks|000000|ffffff|void,Omega-Keks|1a1a1a|ff3a5a|void,Ewigkeitskeks|fff8e0|f0c14b|halo,Leerenkeks|000000|6c63ff|void,Schöpferkeks|ffffff|ffd6f5|prism,Der Letzte Keks|2a1c14|f0a24a|void"
+];
+
+const nice=n=>{if(n<100)return Math.round(n);const p=10**(Math.floor(Math.log10(n))-1);return Math.round(n/p)*p};
+const COOKIES=[];
+RAW.forEach((row,t)=>{row.split(",").forEach((s,j)=>{const [n,d,c,st]=s.split("|");const T=TIERS[t];
+  COOKIES.push({i:COOKIES.length,t,j,n,d:"#"+d,ch:"#"+c,st,N:nice(T.lo*Math.pow(T.hi/T.lo,j/7))})})});
+const EVENTS={
+ midnight:{n:"Mitternachtsbacken",d:"Himmlische und kosmische Kekse mit ×3 Glück",col:"#8f86ff",tierLuck:{9:3,10:3}},
+ sugar:{n:"Zuckersturm",d:"Schiller-Chance ×5",col:"#ff9ad5",shiny:5},
+ heat:{n:"Hitzewelle",d:"Rollen 50 % schneller, verbrannte Kekse ×5",col:"#ff6f3c",speed:1.5,vars:{b:5}},
+ gold:{n:"Goldrausch",d:"Goldene Kekse ×5 und doppelte Krümel",col:"#f7bf3f",vars:{g:5},crumbs:2},
+ lucky:{n:"Glücksbrise",d:"+100 % Glück",col:"#8fd67f",luckAdd:1},
+ cosmic:{n:"Kosmisches Backfenster",d:"Exklusive Fenster-Kekse, Kosmisch und Unendlich ×5",col:"#5ad9ff",tierLuck:{10:5,11:5}},
+};
+const EV_NORMAL=["midnight","sugar","heat","gold","lucky"];
+[["Mitternachtskeks","101830","c8d0ff","stars","midnight",2000],["Zuckerwattekeks","ffc8e8","ffffff","sprinkles","sugar",1500],
+ ["Lavakeks","3a1208","ff6f1f","lava","heat",3000],["Goldbarren-Keks","f7bf3f","fff2a8","facet","gold",5000],
+ ["Kleeblattkeks","7fc96a","2f7a3a","clover","lucky",1000],["Fensterkeks","0a1a3a","5ad9ff","cosmic","cosmic",20000],
+ ["Sternenstaubkeks","1a1040","fff29a","stars","cosmic",80000],["Portalkeks","050308","5ad9ff","void","cosmic",400000]
+].forEach(([n,d,c,st,ev,N],j)=>COOKIES.push({i:COOKIES.length,t:12,j,n,d:"#"+d,ch:"#"+c,st,ev,N}));
+const SORTED=[...COOKIES].sort((a,b)=>b.N-a.N);
+const REG=COOKIES.filter(c=>c.t<12);
+const COMMONEST=REG.reduce((a,b)=>b.N<a.N?b:a);
+const VAR={"":{n:"Normal",pl:"Normal",base:1,cr:1,cls:""},s:{n:"Schillernd",pl:"Schillernd",base:250,cr:5,cls:"sh",badge:"sh"},g:{n:"Golden",pl:"Golden",base:400,cr:10,cls:"gd",badge:"gd"},r:{n:"Riesig",pl:"Riesig",base:150,cr:3,cls:"big",badge:"big"},b:{n:"Verbrannt",pl:"Verbrannt",base:60,cr:.5,cls:"burnt",badge:"burnt"}};
+const VKEYS=["","s","g","r","b"];
+const TOTAL=COOKIES.length*VKEYS.length;
+
+const UPG=[
+ {k:"luck",n:"Glücksmehl",d:"+10 % Glück pro Stufe",max:25,cost:l=>Math.round(60*Math.pow(1.5,l)),ic:"luck"},
+ {k:"speed",n:"Heißluftofen",d:"Rollen 8 % schneller pro Stufe",max:12,cost:l=>Math.round(90*Math.pow(1.65,l)),ic:"speed"},
+ {k:"multi",n:"Doppelblech",d:"+1 Keks pro Roll",max:4,cost:l=>Math.round(800*Math.pow(6,l)),ic:"multi"},
+ {k:"shiny",n:"Schillerzucker",d:"+25 % Schiller-Chance pro Stufe",max:10,cost:l=>Math.round(250*Math.pow(1.8,l)),ic:"shiny"},
+];
+const POT=[
+ {k:"luck",n:"Glückstrank",d:"+50 % Glück für 3 Minuten",cost:220,dur:180,col:"#8fd67f"},
+ {k:"luck2",n:"Großer Glückstrank",d:"+200 % Glück für 3 Minuten",cost:1400,dur:180,col:"#3fc46a"},
+ {k:"shiny",n:"Schillertrank",d:"Dreifache Schiller-Chance für 3 Minuten",cost:700,dur:180,col:"#ff9ad5"},
+ {k:"turbo",n:"Turbotrank",d:"Doppelte Roll-Geschwindigkeit für 3 Minuten",cost:450,dur:180,col:"#62b3f0"},
+ {k:"oracle",n:"Orakel-Keks",d:"Dein nächster Roll hat 25-faches Glück",cost:3000,col:"#b98cff"},
+ {k:"ignite",n:"Event-Zünder",d:"Startet 2 Minuten lang ein zufälliges Ofen-Event nur für dich",cost:1800,col:"#ff9f43"},
+];
+const CODES={
+ "KEKS2":{txt:"1.000 Krümel",f:s=>{s.crumbs+=1000}},
+ "GLUECK":{txt:"2 Glückstränke",f:s=>{s.pots.luck+=2}},
+ "SCHILLER":{txt:"1 Schillertrank",f:s=>{s.pots.shiny+=1}},
+ "ORAKEL":{txt:"1 Orakel-Keks",f:s=>{s.pots.oracle+=1}},
+ "TURBO":{txt:"2 Turbotränke",f:s=>{s.pots.turbo+=2}},
+ "EVENT":{txt:"1 Event-Zünder",f:s=>{s.pots.ignite+=1}},
+};
+const SLOTS={glove:"Handschuh",apron:"Schürze",pin:"Nudelholz",hat:"Mütze"};
+const RECIPES=[
+ {id:"g1",slot:"glove",n:"Ofenhandschuh",col:"#c9a06a",b:{luck:.1},ing:[["Butterkeks",20],["Haferkeks",10]]},
+ {id:"g2",slot:"glove",n:"Glückshandschuh",col:"#8fd67f",b:{luck:.25},ing:[["Schokokeks",15],["Mandelkeks",5],["Honigtaler",3]]},
+ {id:"g3",slot:"glove",n:"Drachenhandschuh",col:"#b7412a",b:{luck:.6},ing:[["Drachenkeks",1],["Lebkuchen",10],["Red Velvet",4]]},
+ {id:"g4",slot:"glove",n:"Engelshandschuh",col:"#fff0a0",b:{luck:1.2,shiny:.2},ing:[["Engelskeks",1],["Phönixkeks",1],["Macaron",15]]},
+ {id:"a1",slot:"apron",n:"Leinenschürze",col:"#e6c38e",b:{crumbs:.25},ing:[["Zuckerkeks",25],["Löffelbiskuit",10]]},
+ {id:"a2",slot:"apron",n:"Glitzerschürze",col:"#ff9ad5",b:{shiny:.5},ing:[["*s",3],["Kokosmakrone",10]]},
+ {id:"a3",slot:"apron",n:"Königsschürze",col:"#9a5fd0",b:{crumbs:.6,luck:.2},ing:[["Kronenkeks",1],["Königsmakrone",1],["Florentiner",8]]},
+ {id:"r1",slot:"pin",n:"Holz-Nudelholz",col:"#a9784a",b:{speed:.1},ing:[["Vollkornkeks",30],["Spekulatius",10]]},
+ {id:"r2",slot:"pin",n:"Marmor-Nudelholz",col:"#d8dce8",b:{speed:.25},ing:[["Espressokeks",4],["Nougatkeks",10],["Goldkeks",1]]},
+ {id:"r3",slot:"pin",n:"Blitz-Nudelholz",col:"#ffe14a",b:{speed:.4,variant:.5},ing:[["Zeuskeks",1],["Sonnentaler",2],["Karamellkeks",15]]},
+ {id:"h1",slot:"hat",n:"Bäckermütze",col:"#f7eadb",b:{event:.25,luck:.05},ing:[["Kokosmakrone",10],["Zimtstern",10]]},
+ {id:"h2",slot:"hat",n:"Zauberhut",col:"#b98cff",b:{variant:1,luck:.3},ing:[["Einhornkeks",1],["Nixenkeks",1],["Blaubeer-Cheesecake",4]]},
+ {id:"h3",slot:"hat",n:"Eventkappe",col:"#ff9f43",b:{event:1,luck:.2},ing:[["Kleeblattkeks",1],["Zuckerwattekeks",1],["Lavakeks",1]]},
+ {id:"h4",slot:"hat",n:"Kosmische Krone",col:"#5ad9ff",b:{luck:3,event:.5},ing:[["Nebula-Keks",1],["Regenbogenkeks",1],["Geisterkeks",1]]},
+];
+const byName=n=>COOKIES.find(c=>c.n===n);
+const TAL=[
+ {k:"luck",n:"Glücksteig",d:"+10 % Glück",max:50,cost:1},
+ {k:"speed",n:"Heißer Start",d:"+4 % Roll-Tempo",max:15,cost:1},
+ {k:"shiny",n:"Schillerblick",d:"+10 % Schiller-Chance",max:20,cost:1},
+ {k:"variant",n:"Variantenmeister",d:"+10 % Chance auf goldene, riesige und verbrannte Kekse",max:20,cost:1},
+ {k:"crumbs",n:"Krümelsegen",d:"+15 % Krümel",max:20,cost:1},
+ {k:"event",n:"Eventbäcker",d:"Event-Boni 10 % stärker",max:10,cost:2},
+ {k:"start",n:"Startkapital",d:"+500 Krümel nach jedem Rebirth",max:10,cost:1},
+ {k:"offline",n:"Nachtschicht",d:"Offline-Backen: +1 Stunde Dauer und +10 % Tempo",max:5,cost:2},
+ {k:"keepmulti",n:"Erbstück-Blech",d:"Nach dem Rebirth mit Doppelblech-Stufe 1 starten",max:1,cost:5},
+];
+
+/* ================= State ================= */
+const KEY="cookierng2_save_v1";
+function fresh(){return{
+  v:3,rolls:0,inv:{},disc:{},crumbs:0,up:{luck:0,speed:0,multi:0,shiny:0},
+  pots:{luck:0,luck2:0,shiny:0,turbo:0,oracle:0,ignite:0},eff:{luck:0,luck2:0,shiny:0,turbo:0},oracle:0,pev:null,baro:0,
+  rebirthLuck:0,rebirths:0,tp:0,tal:{luck:0,speed:0,shiny:0,variant:0,crumbs:0,event:0,start:0,offline:0,keepmulti:0},
+  gear:{own:{},eq:{glove:null,apron:null,pin:null,hat:null}},aura:null,ach:{},codes:{},
+  all:{rolls:0,shinies:0,crumbs:0,potions:0,bestK:null,playMs:0,tier:Array(13).fill(0),blessed:0,sold:0,vars:{s:0,g:0,r:0,b:0},baro:0,nearMyth:0,quests:0,evRolls:0,crafted:0},
+  run:{bestK:null},discPeak:0,q:{day:"",list:[]},streak:{n:0,last:"",best:0},
+  set:{luckCap:0,sound:true,music:false,cut:true,cutMin:4,cutShiny:true,toasts:true,feedToasts:true,pulse:true,cardAnim:true,shake:true,particles:true,suspense:true,showResult:true,mode:"std",x:50},
+  lb:{name:"",joined:false},log:[],savedAt:0,lastSeen:0,feedSeq:0
+}}
+function merge(base,src){for(const k in src){if(src[k]&&typeof src[k]==="object"&&!Array.isArray(src[k])&&base[k]&&typeof base[k]==="object"&&!Array.isArray(base[k]))merge(base[k],src[k]);else base[k]=src[k]}return base}
+function migrate(s){
+  const a=s.all;
+  if(!a.bestK&&typeof a.best==="number"&&a.best>=0)a.bestK=a.best+(a.bestS?"s":"");
+  if(!s.run.bestK&&typeof s.run.best==="number"&&s.run.best>=0)s.run.bestK=String(s.run.best);
+  while(a.tier.length<13)a.tier.push(0);
+  if(a.shinies>a.vars.s)a.vars.s=a.shinies;
+  if(s.rebirthLuck>0){s.tp+=Math.round(s.rebirthLuck*10);s.rebirthLuck=0}
+  for(const k in s.inv)if(!validKey(k))delete s.inv[k];
+  for(const k in s.disc)if(!validKey(k))delete s.disc[k];
+  return s;
+}
+const validKey=k=>{const m=/^(\d+)([sgrb]?)$/.exec(k);return!!m&&+m[1]<COOKIES.length};
+let S=fresh();
+try{const raw=localStorage.getItem(KEY);if(raw)S=merge(fresh(),JSON.parse(raw))}catch(e){}
+S=migrate(S);
+let dirty=true;
+function save(){S.savedAt=Date.now();S.lastSeen=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ================= Helpers ================= */
+const $=id=>document.getElementById(id);
+const nf=new Intl.NumberFormat("de-DE");
+const fmt=n=>nf.format(Math.floor(n));
+const f2=n=>n.toFixed(2).replace(".",",");
+const odds=N=>"1 zu "+fmt(Math.max(1,Math.round(N)));
+const pct=n=>Math.round(n*100)+" %";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const keyOf=(c,v)=>c.i+(v||"");
+const fromKey=k=>{const m=/^(\d+)([sgrb]?)$/.exec(k);return{c:COOKIES[+m[1]],v:m[2]||""}};
+const valOf=(c,v)=>c.N*VAR[v||""].base;
+const valKey=k=>{const{c,v}=fromKey(k);return valOf(c,v)};
+const mmss=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+const tierName=t=>TIERS[t].prism?`<span class="rar prism-text">${TIERS[t].n}</span>`:`<span class="rar" style="color:${TIERS[t].c}">${TIERS[t].n}</span>`;
+const varBadge=v=>v?`<span class="badge ${VAR[v].badge}">${VAR[v].n}</span>`:"";
+function hexRgb(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+function mix(a,b,t){const A=hexRgb(a),B=hexRgb(b);return`rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(",")})`}
+function rgba(h,a){const[r,g,b]=hexRgb(h);return`rgba(${r},${g},${b},${a})`}
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function timeAgo(t){const s=Math.max(0,(Date.now()-t)/1000);if(s<60)return"gerade eben";if(s<3600)return"vor "+Math.floor(s/60)+" min";if(s<86400)return"vor "+Math.floor(s/3600)+" h";return"vor "+Math.floor(s/86400)+" d"}
+
+/* ================= Cookie art ================= */
+const IMG=[];
+function drawCookie(c){
+  const Z=128,cv=document.createElement("canvas");cv.width=cv.height=Z;const x=cv.getContext("2d");
+  const r=mulberry(c.i*977+13),cx=64,cy=64,R=44,T=TIERS[c.t];
+  const disk=()=>{const a=r()*Math.PI*2,d=Math.sqrt(r())*R*.82;return[cx+Math.cos(a)*d,cy+Math.sin(a)*d]};
+  if(c.t>=5){const g=x.createRadialGradient(cx,cy,R*.7,cx,cy,64);g.addColorStop(0,rgba(T.c,c.t>=8?.7:.5));g.addColorStop(1,rgba(T.c,0));x.fillStyle=g;x.fillRect(0,0,Z,Z)}
+  if(c.t===10){x.save();x.translate(cx,cy);x.rotate(-.35);x.strokeStyle=rgba(c.ch,.75);x.lineWidth=2.5;x.beginPath();x.ellipse(0,0,60,16,0,Math.PI,Math.PI*2);x.stroke();x.restore()}
+  // outline
+  const wob=c.st==="ghost"||c.t>=9?.02:.07;const pts=[];const n=30;
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2;pts.push([cx+Math.cos(a)*R*(1+(r()-.5)*wob),cy+Math.sin(a)*R*(1+(r()-.5)*wob)])}
+  const path=()=>{x.beginPath();pts.forEach((p,i)=>{const q=pts[(i+1)%n];const m=[(p[0]+q[0])/2,(p[1]+q[1])/2];i?x.quadraticCurveTo(p[0],p[1],m[0],m[1]):x.moveTo(m[0],m[1])});
+    const p=pts[0],q=pts[1];x.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2);x.closePath()};
+  x.save();x.shadowColor="rgba(0,0,0,.5)";x.shadowBlur=8;x.shadowOffsetY=4;x.globalAlpha=c.st==="ghost"?.8:1;path();x.fillStyle=c.d;x.fill();x.restore();
+  x.save();path();x.clip();
+  const g=x.createRadialGradient(cx-14,cy-16,4,cx,cy,R+4);g.addColorStop(0,mix(c.d,"#ffffff",.18));g.addColorStop(.7,c.d);g.addColorStop(1,mix(c.d,"#000000",.3));
+  x.globalAlpha=c.st==="ghost"?.8:1;x.fillStyle=g;x.fillRect(0,0,Z,Z);x.globalAlpha=1;
+  PAT[c.st](x,c,r,disk,cx,cy,R);
+  x.restore();
+  // rim
+  x.save();path();x.lineWidth=1.5;x.strokeStyle=mix(c.d,"#000000",.45);x.globalAlpha=.6;x.stroke();x.restore();
+  if(c.t===7||c.st==="prism"){x.save();path();const cg=x.createConicGradient?x.createConicGradient(0,cx,cy):null;if(cg){["#ff7a7a","#ffd27a","#9dff8a","#7adfff","#c79bff","#ff7ad9","#ff7a7a"].forEach((col,i)=>cg.addColorStop(i/6,col));x.strokeStyle=cg}else x.strokeStyle="#fff";x.lineWidth=3;x.stroke();x.restore()}
+  if(c.t===11){x.save();x.beginPath();x.arc(cx,cy,R+7,0,Math.PI*2);x.strokeStyle="#fff";x.lineWidth=1.5;x.stroke();x.beginPath();x.arc(cx,cy,R+11,0,Math.PI*2);x.strokeStyle="rgba(255,255,255,.35)";x.stroke();x.restore()}
+  if(c.t===10){x.save();x.translate(cx,cy);x.rotate(-.35);x.strokeStyle=rgba(c.ch,.9);x.lineWidth=2.5;x.beginPath();x.ellipse(0,0,60,16,0,0,Math.PI);x.stroke();x.restore()}
+  if(c.t>=4){x.save();x.globalAlpha=.35;x.strokeStyle="#fff";x.lineWidth=3;x.lineCap="round";x.beginPath();x.arc(cx,cy,R-6,Math.PI*1.1,Math.PI*1.4);x.stroke();x.restore()}
+  return cv.toDataURL();
+}
+function blob(x,px,py,rad,r,col){x.beginPath();const k=7;for(let i=0;i<=k;i++){const a=i/k*Math.PI*2,rr=rad*(.75+r()*.4);const X=px+Math.cos(a)*rr,Y=py+Math.sin(a)*rr;i?x.lineTo(X,Y):x.moveTo(X,Y)}x.closePath();x.fillStyle=col;x.fill()}
+function star4(x,px,py,s,col){x.fillStyle=col;x.beginPath();x.moveTo(px,py-s);x.quadraticCurveTo(px,py,px+s,py);x.quadraticCurveTo(px,py,px,py+s);x.quadraticCurveTo(px,py,px-s,py);x.quadraticCurveTo(px,py,px,py-s);x.fill()}
+const PAT={
+ chips(x,c,r,disk){for(let i=0;i<11;i++){const[p,q]=disk();blob(x,p,q,4+r()*3.5,r,c.ch);x.fillStyle="rgba(255,255,255,.18)";x.beginPath();x.arc(p-1.5,q-1.5,1.3,0,7);x.fill()}},
+ oat(x,c,r,disk){x.strokeStyle=rgba(c.ch,.7);x.lineCap="round";for(let i=0;i<30;i++){const[p,q]=disk(),a=r()*3;x.lineWidth=2+r()*2;x.beginPath();x.moveTo(p,q);x.lineTo(p+Math.cos(a)*5,q+Math.sin(a)*5);x.stroke()}},
+ dock(x,c,r,disk,cx,cy){x.fillStyle=mix(c.d,"#000000",.35);for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++){if(i*i+j*j>6)continue;x.beginPath();x.arc(cx+i*15,cy+j*15,2.2,0,7);x.fill()}},
+ sugar(x,c,r,disk){for(let i=0;i<70;i++){const[p,q]=disk();x.fillStyle=`rgba(255,255,255,${.4+r()*.5})`;x.fillRect(p,q,1.8,1.8)}},
+ crack(x,c,r,disk,cx,cy){x.strokeStyle=mix(c.d,"#000000",.35);x.lineWidth=1.6;for(let i=0;i<6;i++){let[p,q]=disk();x.beginPath();x.moveTo(p,q);for(let k=0;k<4;k++){p+=(r()-.5)*14;q+=(r()-.5)*14;x.lineTo(p,q)}x.stroke()}},
+ drizzle(x,c,r,disk,cx,cy,R){x.strokeStyle=c.ch;x.lineWidth=3;x.lineCap="round";for(let k=0;k<6;k++){const y0=cy-R+14+k*13;x.beginPath();for(let X=cx-R;X<=cx+R;X+=4){const Y=y0+Math.sin(X*.25+k)*5;X===cx-R?x.moveTo(X,Y):x.lineTo(X,Y)}x.stroke()}},
+ filled(x,c,r,disk,cx,cy,R){PAT.sugar(x,c,r,disk);const g=x.createRadialGradient(cx-5,cy-5,2,cx,cy,R*.4);g.addColorStop(0,mix(c.ch,"#ffffff",.4));g.addColorStop(1,c.ch);x.fillStyle=g;x.beginPath();x.arc(cx,cy,R*.4,0,7);x.fill()},
+ sandwich(x,c,r,disk,cx,cy,R){x.strokeStyle=c.ch;x.lineWidth=7;x.beginPath();x.arc(cx,cy,R-3,0,7);x.stroke();x.fillStyle="rgba(255,255,255,.18)";x.beginPath();x.ellipse(cx-8,cy-10,18,10,-.5,0,7);x.fill()},
+ nuts(x,c,r,disk){for(let i=0;i<7;i++){const[p,q]=disk();x.save();x.translate(p,q);x.rotate(r()*3);x.fillStyle=c.ch;x.beginPath();x.ellipse(0,0,7,3.5,0,0,7);x.fill();x.strokeStyle="rgba(0,0,0,.25)";x.lineWidth=1;x.stroke();x.restore()}},
+ swirl(x,c,r,disk,cx,cy,R){x.strokeStyle=c.ch;x.lineWidth=4;x.lineCap="round";x.beginPath();for(let a=0;a<Math.PI*6;a+=.1){const d=a/(Math.PI*6)*R*.85;const X=cx+Math.cos(a)*d,Y=cy+Math.sin(a)*d;a?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke()},
+ dust(x,c,r,disk){for(let i=0;i<220;i++){const[p,q]=disk();x.fillStyle=rgba(c.ch,.25+r()*.4);x.beginPath();x.arc(p,q,.6+r()*1.4,0,7);x.fill()}},
+ sprinkles(x,c,r,disk){const cols=["#ff6f91","#7fdfff","#ffe27a","#9dff8a","#c79bff",c.ch];for(let i=0;i<34;i++){const[p,q]=disk();x.save();x.translate(p,q);x.rotate(r()*3);x.fillStyle=cols[i%cols.length];x.fillRect(-3.5,-1.2,7,2.4);x.restore()}},
+ dots(x,c,r,disk){for(let i=0;i<14;i++){const[p,q]=disk();x.fillStyle=c.ch;x.beginPath();x.arc(p,q,2+r()*3.5,0,7);x.fill();x.fillStyle="rgba(255,255,255,.3)";x.beginPath();x.arc(p-1,q-1,1,0,7);x.fill()}},
+ scales(x,c,r,disk,cx,cy,R){x.strokeStyle=rgba(c.ch,.85);x.lineWidth=2;for(let yy=cy-R;yy<cy+R;yy+=10)for(let xx=cx-R;xx<cx+R;xx+=12){const o=((yy-cy+R)/10)%2?6:0;x.beginPath();x.arc(xx+o,yy,6,0,Math.PI);x.stroke()}},
+ jewels(x,c,r,disk,cx,cy){PAT.sugar(x,c,r,disk);const cols=[c.ch,"#3a6fd9","#3fc46a",c.ch,"#b98cff"];cols.forEach((col,i)=>{const a=i/5*Math.PI*2-Math.PI/2,p=cx+Math.cos(a)*22,q=cy+Math.sin(a)*22;x.fillStyle=col;x.beginPath();x.moveTo(p,q-6);x.lineTo(p+5,q);x.lineTo(p,q+6);x.lineTo(p-5,q);x.fill();x.fillStyle="rgba(255,255,255,.6)";x.fillRect(p-1.5,q-3,2,2)})},
+ rays(x,c,r,disk,cx,cy,R){x.fillStyle=rgba(c.ch,.55);for(let i=0;i<12;i++){const a=i/12*Math.PI*2;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a-.12)*R,cy+Math.sin(a-.12)*R);x.lineTo(cx+Math.cos(a+.12)*R,cy+Math.sin(a+.12)*R);x.fill()}x.fillStyle=c.ch;x.beginPath();x.arc(cx,cy,9,0,7);x.fill()},
+ halo(x,c,r,disk,cx,cy,R){PAT.sugar(x,c,r,disk);x.strokeStyle=c.ch;x.lineWidth=4;x.shadowColor=c.ch;x.shadowBlur=10;x.beginPath();x.arc(cx,cy,R*.55,0,7);x.stroke();x.shadowBlur=0},
+ bolt(x,c,r,disk,cx,cy){x.fillStyle=c.ch;x.shadowColor=c.ch;x.shadowBlur=8;x.beginPath();x.moveTo(cx+6,cy-30);x.lineTo(cx-10,cy+2);x.lineTo(cx+1,cy+2);x.lineTo(cx-6,cy+30);x.lineTo(cx+12,cy-6);x.lineTo(cx+1,cy-6);x.closePath();x.fill();x.shadowBlur=0},
+ eye(x,c,r,disk,cx,cy){x.fillStyle="#fffbe8";x.beginPath();x.moveTo(cx-24,cy);x.quadraticCurveTo(cx,cy-20,cx+24,cy);x.quadraticCurveTo(cx,cy+20,cx-24,cy);x.fill();x.fillStyle=c.ch;x.beginPath();x.arc(cx,cy,9,0,7);x.fill();x.fillStyle="#111";x.beginPath();x.ellipse(cx,cy,3,7,0,0,7);x.fill()},
+ facet(x,c,r,disk,cx,cy,R){const k=10;for(let i=0;i<k;i++){const a=i/k*Math.PI*2,b=(i+1)/k*Math.PI*2;x.fillStyle=i%2?"rgba(255,255,255,.22)":"rgba(0,0,0,.12)";x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a)*R*1.1,cy+Math.sin(a)*R*1.1);x.lineTo(cx+Math.cos(b)*R*1.1,cy+Math.sin(b)*R*1.1);x.fill()}x.strokeStyle=rgba(c.ch,.8);x.lineWidth=1.5;x.beginPath();for(let i=0;i<=6;i++){const a=i/6*Math.PI*2;const X=cx+Math.cos(a)*R*.5,Y=cy+Math.sin(a)*R*.5;i?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke()},
+ prism(x,c,r,disk,cx,cy,R){if(x.createConicGradient){const cg=x.createConicGradient(r()*6,cx,cy);["#ff7a7a","#ffd27a","#9dff8a","#7adfff","#c79bff","#ff7ad9","#ff7a7a"].forEach((col,i)=>cg.addColorStop(i/6,col));x.globalAlpha=.55;x.fillStyle=cg;x.fillRect(0,0,128,128);x.globalAlpha=1}PAT.facet(x,c,r,disk,cx,cy,R)},
+ ghost(x,c,r,disk,cx,cy){for(let i=0;i<6;i++){const[p,q]=disk();const g=x.createRadialGradient(p,q,0,p,q,16);g.addColorStop(0,"rgba(255,255,255,.55)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(p-16,q-16,32,32)}for(let i=0;i<9;i++){const[p,q]=disk();x.fillStyle=c.ch;x.shadowColor=c.ch;x.shadowBlur=8;x.beginPath();x.arc(p,q,2+r()*2,0,7);x.fill()}x.shadowBlur=0},
+ stars(x,c,r,disk){for(let i=0;i<50;i++){const[p,q]=disk();x.fillStyle=`rgba(255,255,255,${.3+r()*.7})`;x.fillRect(p,q,1.3,1.3)}for(let i=0;i<5;i++){const[p,q]=disk();star4(x,p,q,4+r()*4,c.ch)}},
+ craters(x,c,r,disk){for(let i=0;i<9;i++){const[p,q]=disk(),s=3+r()*7;x.fillStyle=mix(c.d,"#000000",.2);x.beginPath();x.arc(p,q,s,0,7);x.fill();x.strokeStyle="rgba(255,255,255,.35)";x.lineWidth=1;x.beginPath();x.arc(p+.8,q+.8,s,Math.PI*.1,Math.PI*.9);x.stroke()}},
+ aurora(x,c,r,disk,cx,cy,R){PAT.stars(x,c,r,disk);for(let k=0;k<3;k++){x.strokeStyle=rgba(k===1?"#9f7aff":c.ch,.55);x.lineWidth=7-k*2;x.beginPath();for(let X=cx-R;X<=cx+R;X+=3){const Y=cy-8+k*9+Math.sin(X*.12+k)*8;X===cx-R?x.moveTo(X,Y):x.lineTo(X,Y)}x.stroke()}},
+ cosmic(x,c,r,disk,cx,cy){x.globalCompositeOperation="screen";for(let i=0;i<5;i++){const[p,q]=disk();const g=x.createRadialGradient(p,q,0,p,q,22+r()*14);const col=i%2?c.ch:"#5ad9ff";g.addColorStop(0,rgba(col,.7));g.addColorStop(1,rgba(col,0));x.fillStyle=g;x.fillRect(0,0,128,128)}x.globalCompositeOperation="source-over";PAT.stars(x,c,r,disk)},
+ void(x,c,r,disk,cx,cy,R){PAT.stars(x,{ch:c.ch},r,disk);x.strokeStyle=c.ch;x.lineWidth=4;x.shadowColor=c.ch;x.shadowBlur=12;x.beginPath();for(let a=0;a<=Math.PI*2+.05;a+=.05){const s=Math.sin(a),k=1+s*s;const X=cx+R*.6*Math.cos(a)/k,Y=cy+R*.6*Math.sin(a)*Math.cos(a)/k;a?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke();x.shadowBlur=0},
+};
+
+PAT.lava=(x,c,r,disk,cx,cy)=>{x.strokeStyle=c.ch;x.lineWidth=2.4;x.shadowColor=c.ch;x.shadowBlur=10;for(let i=0;i<7;i++){let[p,q]=disk();x.beginPath();x.moveTo(p,q);for(let k=0;k<4;k++){p+=(r()-.5)*16;q+=(r()-.5)*16;x.lineTo(p,q)}x.stroke()}x.shadowBlur=0};
+PAT.clover=(x,c,r,disk,cx,cy)=>{PAT.sugar(x,c,r,disk);x.fillStyle=c.ch;for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4;x.beginPath();x.arc(cx+Math.cos(a)*11,cy+Math.sin(a)*11,11,0,7);x.fill()}x.strokeStyle=c.ch;x.lineWidth=3;x.beginPath();x.moveTo(cx,cy);x.quadraticCurveTo(cx+8,cy+20,cx+4,cy+30);x.stroke()};
+COOKIES.forEach(c=>IMG[c.i]=drawCookie(c));
+(()=>{const st=document.createElement("style");st.textContent=COOKIES.map(c=>`.ci${c.i}{background-image:url(${IMG[c.i]})}`).join("\n");document.head.appendChild(st)})();
+function ckHTML(c,v,unk){return`<span class="ck ci${c.i}${v?" "+VAR[v].cls:""}${unk?" unk":""}" role="img" aria-label="${unk?"Unbekannter Keks":esc(c.n)}"></span>`}
+function potIcon(col,big){const s=big?46:40;return`<svg class="ic" viewBox="0 0 40 40" width="${s}" height="${s}" aria-hidden="true"><path d="M15 5h10v3h-1v7l8 13a5 5 0 0 1-4 7H12a5 5 0 0 1-4-7l8-13V8h-1z" fill="#3d2a1f" stroke="#6b4a36" stroke-width="1.5"/><path d="M11 25h18l2.4 4a3 3 0 0 1-2.6 4.4H11.2A3 3 0 0 1 8.6 29z" fill="${col}"/><circle cx="17" cy="28" r="1.6" fill="#fff" opacity=".6"/></svg>`}
+function upIcon(k){const m={luck:`<path d="M20 8c-4 4-4 8 0 12 4-4 4-8 0-12zM8 20c4 4 8 4 12 0-4-4-8-4-12 0zM32 20c-4-4-8-4-12 0 4 4 8 4 12 0zM20 32c4-4 4-8 0-12-4 4-4 8 0 12z" fill="#8fd67f"/>`,
+ speed:`<rect x="6" y="10" width="28" height="22" rx="4" fill="#3d2a1f" stroke="#6b4a36"/><rect x="10" y="14" width="20" height="10" rx="2" fill="#f0a24a" opacity=".85"/><circle cx="13" cy="28" r="1.6" fill="#b89c86"/><circle cx="19" cy="28" r="1.6" fill="#b89c86"/>`,
+ multi:`<rect x="5" y="12" width="30" height="18" rx="3" fill="#3a322e" stroke="#5a504a"/><circle cx="14" cy="21" r="5" fill="#d9b173"/><circle cx="26" cy="21" r="5" fill="#d2a064"/>`,
+ shiny:`<path d="M20 5l3 10 10 3-10 3-3 10-3-10-10-3 10-3z" fill="#ff9ad5"/><circle cx="31" cy="30" r="2" fill="#9fd8ff"/>`};
+ return`<svg class="ic" viewBox="0 0 40 40" width="46" height="46" aria-hidden="true">${m[k]}</svg>`}
+
+function gearIcon(slot,col,sz){sz=sz||46;const p={
+ glove:`<path d="M12 34V17a4 4 0 0 1 8 0v-6a3 3 0 0 1 6 0v8l3-3a3 3 0 0 1 4 4l-7 9v5z" fill="${col}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/><rect x="11" y="31" width="16" height="5" rx="1.5" fill="rgba(0,0,0,.25)"/>`,
+ apron:`<path d="M14 6h12v6l6 3-2 5-4-2v16H14V18l-4 2-2-5 6-3z" fill="${col}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/><rect x="16" y="22" width="8" height="6" rx="1" fill="rgba(0,0,0,.18)"/>`,
+ pin:`<rect x="10" y="15" width="20" height="10" rx="4" fill="${col}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/><rect x="3" y="18" width="7" height="4" rx="2" fill="#8a5a2b"/><rect x="30" y="18" width="7" height="4" rx="2" fill="#8a5a2b"/>`,
+ hat:`<path d="M11 24a7 7 0 0 1 3-13 7 7 0 0 1 12 0 7 7 0 0 1 3 13v7H11z" fill="${col}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/><rect x="11" y="27" width="18" height="5" fill="rgba(0,0,0,.15)"/>`};
+ return`<svg class="ic" viewBox="0 0 40 40" width="${sz}" height="${sz}" aria-hidden="true">${p[slot]}</svg>`}
+
+/* ================= Events ================= */
+const SLOT_MS=6*60*1000,EV_DUR=150000;
+function evAt(slot){const r=mulberry(slot*7919+17);r();if(r()>0.65)return null;const x=r();const type=x<0.08?"cosmic":EV_NORMAL[Math.min(4,Math.floor((x-0.08)/0.92*5))];const start=slot*SLOT_MS+Math.floor(r()*90000);return{type,start,end:start+EV_DUR}}
+function globalEvent(now){const e=evAt(Math.floor(now/SLOT_MS));return e&&now>=e.start&&now<e.end?e:null}
+function nextGlobal(now){for(let s=Math.floor(now/SLOT_MS);s<Math.floor(now/SLOT_MS)+80;s++){const e=evAt(s);if(e&&e.start>now)return e}return null}
+function activeEvents(){const now=Date.now(),out=[];const g=globalEvent(now);if(g)out.push({...g,global:true});if(S.pev&&S.pev.until>now&&(!g||g.type!==S.pev.type))out.push({type:S.pev.type,end:S.pev.until,global:false});return out}
+function evMods(){
+  const m={tierLuck:{},shiny:1,speed:1,vars:{g:1,r:1,b:1},crumbs:1,luckAdd:0,types:new Set(),list:activeEvents()};
+  const k=1+S.tal.event*.1+gearB().event;const amp=x=>1+(x-1)*k;
+  for(const e of m.list){const E=EVENTS[e.type];m.types.add(e.type);
+    if(E.tierLuck)for(const t in E.tierLuck)m.tierLuck[t]=(m.tierLuck[t]||1)*amp(E.tierLuck[t]);
+    if(E.shiny)m.shiny*=amp(E.shiny);if(E.speed)m.speed*=amp(E.speed);if(E.crumbs)m.crumbs*=amp(E.crumbs);if(E.luckAdd)m.luckAdd+=E.luckAdd*k;
+    if(E.vars)for(const v in E.vars)m.vars[v]*=amp(E.vars[v]);}
+  return m;
+}
+const NOEV={tierLuck:{},shiny:1,speed:1,vars:{g:1,r:1,b:1},crumbs:1,luckAdd:0,types:new Set(),list:[]};
+
+/* ================= Game math ================= */
+function gearB(){const b={luck:0,shiny:0,speed:0,crumbs:0,variant:0,event:0};for(const s in S.gear.eq){const r=RECIPES.find(x=>x.id===S.gear.eq[s]);if(r)for(const k in r.b)b[k]+=r.b[k]}return b}
+const luckMult=(ev)=>1+S.up.luck*.1+S.tal.luck*.1+S.rebirthLuck+gearB().luck+(S.eff.luck>0?.5:0)+(S.eff.luck2>0?2:0)+(ev||NOEV).luckAdd;
+const capL=L=>S.set.luckCap>0?Math.max(1,Math.min(L,S.set.luckCap)):L;
+const shinyMult=(ev)=>(1+S.up.shiny*.25+S.tal.shiny*.1+gearB().shiny)*(S.eff.shiny>0?3:1)*(ev||NOEV).shiny;
+const variantMult=()=>1+S.tal.variant*.1+gearB().variant;
+const rollDelay=(ev)=>Math.max(60,650*Math.pow(.92,S.up.speed)/(1+S.tal.speed*.04+gearB().speed)/(S.eff.turbo>0?2:1)/(ev||NOEV).speed);
+const perRoll=()=>1+S.up.multi;
+const crumbMult=(ev)=>(1+S.tal.crumbs*.15+gearB().crumbs)*(ev||NOEV).crumbs;
+const crumbVal=(c,v,ev)=>Math.max(1,Math.round(Math.max(1,Math.round(Math.pow(c.N,.55)))*VAR[v||""].cr*crumbMult(ev)));
+function pick(L,ev){let nm=null;
+  for(const c of SORTED){if(c.ev&&!ev.types.has(c.ev))continue;const Lc=L*(ev.tierLuck[c.t]||1);const x=Math.random()*c.N;if(x<Lc)return{c,nm};if(!nm&&c.t>=4&&c.t<12&&x<Lc*4)nm=c}
+  return{c:COMMONEST,nm}}
+function rollVar(ev){const vm=variantMult();
+  if(Math.random()<shinyMult(ev)/250)return"s";
+  if(Math.random()<vm*ev.vars.g/400)return"g";
+  if(Math.random()<vm*ev.vars.r/150)return"r";
+  if(Math.random()<vm*ev.vars.b/60)return"b";
+  return""}
+const discCount=()=>Object.keys(S.disc).length;
+const tierComplete=(t,v)=>COOKIES.filter(c=>c.t===t).every(c=>S.disc[keyOf(c,v)]);
+function rebirthGain(){let g=0;for(let t=0;t<12;t++)for(const v of VKEYS)if(tierComplete(t,v))g+=v==="s"?2:1;return g}
+const talentSpent=()=>TAL.reduce((a,t)=>a+S.tal[t.k]*t.cost,0);
+
+/* ================= Quests ================= */
+const dayKey=d=>{d=d||new Date();return`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`};
+const QDEF=[
+ {t:"roll",mk:r=>{const n=[200,400,800][Math.floor(r()*3)];return{n,txt:`Rolle ${fmt(n)}-mal`,rw:Math.round(n*1.5)}}},
+ {t:"tier",mk:r=>{const o=[[2,15,300],[3,5,600],[4,1,1500]][Math.floor(r()*3)];return{n:o[1],p:o[0],txt:`Finde ${o[1]} ${o[1]>1?"Kekse":"Keks"} ab ${TIERS[o[0]].n}`,rw:o[2]}}},
+ {t:"var",mk:r=>{const o=[["b",5,"verbrannte Kekse",300],["r",3,"riesige Kekse",500],["g",1,"goldenen Keks",1200]][Math.floor(r()*3)];return{n:o[1],p:o[0],txt:`Finde ${o[1]} ${o[2]}`,rw:o[3]}}},
+ {t:"pot",mk:()=>({n:2,txt:"Benutze 2 Tränke",rw:500})},
+ {t:"event",mk:()=>({n:150,txt:"Backe 150 Kekse während eines Ofen-Events",rw:900})},
+ {t:"new",mk:()=>({n:3,txt:"Entdecke 3 neue Sammelbuch-Einträge",rw:700})},
+ {t:"crumbs",mk:r=>{const n=[2000,5000][Math.floor(r()*2)];return{n,txt:`Verdiene ${fmt(n)} Krümel`,rw:Math.round(n*.3)}}},
+];
+function ensureQuests(){
+  const d=dayKey();if(S.q.day===d&&S.q.list.length)return;
+  let h=0;for(const ch of d)h=(h*31+ch.charCodeAt(0))|0;const r=mulberry(h);
+  const pool=[...QDEF];const list=[];
+  while(list.length<3){const i=Math.floor(r()*pool.length);const q=pool.splice(i,1)[0];const o=q.mk(r);list.push({t:q.t,...o,prog:0,done:false,claimed:false})}
+  S.q={day:d,list};dirty=true;
+}
+function qHook(t,amt,p){let ch=false;for(const q of S.q.list){if(q.done||q.t!==t)continue;
+  if(t==="tier"&&!(p>=q.p&&p<12))continue;if(t==="var"&&p!==q.p)continue;
+  q.prog=Math.min(q.n,q.prog+amt);if(q.prog>=q.n){q.done=true;toast("Auftrag erfüllt",q.txt+" · Belohnung abholen");ch=true}}
+  if(ch&&tab==="roll")renderQuests()}
+function claimQuest(i){const q=S.q.list[i];if(!q||!q.done||q.claimed)return;q.claimed=true;
+  const rw=Math.round(q.rw*(1+S.rebirths*.25));S.crumbs+=rw;S.all.crumbs+=rw;S.all.quests++;let msg=`+${fmt(rw)} Krümel`;
+  if(i===2){const pk=["luck","shiny","turbo"][Math.floor(Math.random()*3)];S.pots[pk]++;msg+=` und 1 ${POT.find(p=>p.k===pk).n}`}
+  if(S.q.list.every(x=>x.claimed)){const y=new Date();y.setDate(y.getDate()-1);S.streak.n=S.streak.last===dayKey(y)?S.streak.n+1:1;S.streak.last=S.q.day;S.streak.best=Math.max(S.streak.best,S.streak.n);
+    const sb=500*S.streak.n;S.crumbs+=sb;msg+=` · Serie Tag ${S.streak.n}: +${fmt(sb)} Krümel`;
+    if(S.streak.n%7===0){S.pots.oracle++;S.pots.luck2++;msg+=" · Wochenbonus: Orakel-Keks und Großer Glückstrank"}}
+  toast("Belohnung erhalten",msg);dirty=true;checkAch();renderAll()}
+
+/* ================= Rolling ================= */
+function doRoll(){
+  S.rolls++;S.all.rolls++;
+  let bonus=1;const tags=[];
+  if(S.rolls%1000===0){bonus=10;tags.push("Gesegneter Roll ×10");S.all.blessed++}
+  else if(S.rolls%100===0){bonus=2;tags.push("Glücksroll ×2")}
+  if(S.oracle>0){S.oracle--;bonus*=25;tags.push("Orakel ×25")}
+  if(S.baro>=1){bonus*=5;S.baro=0;S.all.baro++;tags.push("Glücksbarometer entladen ×5")}
+  const ev=evMods(),L=capL(luckMult(ev))*bonus,out=[];let nm=null;
+  for(let k=0;k<perRoll();k++){const p=pick(L,ev);out.push({c:p.c,v:rollVar(ev)});if(p.nm&&(!nm||p.nm.N>nm.N))nm=p.nm}
+  if(ev.list.length)S.all.evRolls+=out.length;
+  return{out,tag:tags.join(" · "),L,ev,nm};
+}
+function apply(res,quiet){
+  let best=null,anyNew=false,news=0,gained=0;
+  for(const r of res.out){
+    const k=keyOf(r.c,r.v);r.isNew=!S.disc[k];if(r.isNew){anyNew=true;news++}
+    S.disc[k]=1;S.inv[k]=(S.inv[k]||0)+1;
+    const cv=crumbVal(r.c,r.v,res.ev);S.crumbs+=cv;S.all.crumbs+=cv;gained+=cv;S.all.tier[r.c.t]++;
+    if(r.v){S.all.vars[r.v]++;if(r.v==="s")S.all.shinies++}
+    const val=valOf(r.c,r.v);
+    if(!S.all.bestK||val>valKey(S.all.bestK))S.all.bestK=k;
+    if(!S.run.bestK||val>valKey(S.run.bestK))S.run.bestK=k;
+    if(!best||val>valOf(best.c,best.v)||(r.isNew&&!best.isNew&&r.c.t>=best.c.t))best=r;
+    if(!quiet){S.log.unshift({k,n:S.rolls,nw:r.isNew});
+      qHook("tier",1,r.c.t);if(r.v)qHook("var",1,r.v);if(res.ev.list.length)qHook("event",1);
+      if(val>=50000||(r.c.t===12&&r.c.N>=20000))feedPost(r);}
+  }
+  if(!quiet){qHook("roll",1);if(news)qHook("new",news);qHook("crumbs",gained);
+    S.baro=anyNew?Math.max(0,S.baro-.25):Math.min(1,S.baro+.0025);}
+  if(S.log.length>60)S.log.length=60;
+  S.discPeak=Math.max(S.discPeak,discCount());
+  dirty=true;
+  return{best,anyNew};
+}
+
+/* ================= Audio ================= */
+let AC=null;
+function audio(){if(!S.set.sound&&!S.set.music)return null;try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){return null}setMusic();return AC}
+function tone(f,d,type,vol,when,att){if(!S.set.sound)return;rawTone(f,d,type,vol,when,att)}
+function rawTone(f,d,type,vol,when,att){if(!AC)return;const t=AC.currentTime+(when||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.08,t+(att||.01));g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.05)}
+const sTick=()=>tone(520+Math.random()*120,.05,"triangle",.03);
+function sReveal(t,v){const tt=Math.min(t,11);const base=[392,440,494,523,587,659,698,784,880,988,1047,1175];const n=Math.min(2+tt,8);for(let i=0;i<n;i++)tone(base[Math.min(i+Math.floor(tt/2),11)],.35,"sine",.06,i*.07);if(v==="s"||v==="g")for(let i=0;i<4;i++)tone(1568+i*200,.2,"triangle",.03,.3+i*.06);if(t>=8)tone(55,1.2,"sawtooth",.05)}
+let musT=null,musI=0;
+function setMusic(){if(S.set.music&&AC){if(!musT){musT=setInterval(playChord,2600);playChord()}}else if(musT){clearInterval(musT);musT=null}}
+function playChord(){if(!AC||!S.set.music||document.visibilityState!=="visible")return;const ev=activeEvents().length>0;
+  const ch=ev?[[262,330,392,523],[294,370,440,587],[247,311,370,494],[294,370,440,587]]:[[220,262,330],[175,220,262],[196,247,294],[165,208,247]];
+  const c=ch[musI++%ch.length];c.forEach((f,i)=>rawTone(f,2.5,"sine",.018,i*.04,.6));rawTone(c[0]/2,2.4,"triangle",.025,0,.3)}
+
+/* ================= Particles ================= */
+const fx={parts:[],raf:0};
+function burst(col,n,spark){if(!S.set.particles)return;const cv=$("fx"),tr=$("tray");const w=tr.clientWidth,h=tr.clientHeight,dpr=window.devicePixelRatio||1;
+  if(cv.width!==w*dpr){cv.width=w*dpr;cv.height=h*dpr}
+  const crumbs=["#d9b173","#b0703a","#e6c38e","#8a5a2b","#f0dcb0"];
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,sp=2+Math.random()*6;fx.parts.push({x:w/2,y:h/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,life:1,s:spark&&i%2?2+Math.random()*2:1.5+Math.random()*3,c:spark&&i%2?col:crumbs[i%crumbs.length],sp:spark&&i%2})}
+  if(!fx.raf)fx.raf=requestAnimationFrame(fxLoop)}
+function fxLoop(){const cv=$("fx"),x=cv.getContext("2d"),dpr=window.devicePixelRatio||1;x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,cv.width,cv.height);
+  fx.parts=fx.parts.filter(p=>p.life>0);
+  for(const p of fx.parts){p.x+=p.vx;p.y+=p.vy;p.vy+=p.sp?.08:.25;p.vx*=.98;p.life-=p.sp?.012:.018;x.globalAlpha=Math.max(0,p.life);x.fillStyle=p.c;
+    if(p.sp){x.beginPath();x.moveTo(p.x,p.y-p.s*2);x.lineTo(p.x+p.s*.6,p.y);x.lineTo(p.x,p.y+p.s*2);x.lineTo(p.x-p.s*.6,p.y);x.fill()}else x.fillRect(p.x,p.y,p.s,p.s)}
+  x.globalAlpha=1;fx.raf=fx.parts.length?requestAnimationFrame(fxLoop):0}
+
+/* ================= Roll UI ================= */
+let busy=false,auto=false,xLeft=0,cutOpen=false,lastUi=0;
+const rpsBuf=[];
+const SLOT_SZ=[42,42,31,25,21,17];
+function setStage(items,best){
+  const n=items.length,st=$("stageCookie");st.style.setProperty("--sz",SLOT_SZ[n]+"%");
+  st.innerHTML=items.map(r=>{const T=TIERS[r.c.t],glow=r.c.t>=3||r.v==="s"||r.v==="g";
+    const lbl=n>1?`<span class="lbl" style="color:${T.c}">${T.n}<span class="bs">${r.isNew?'<span class="badge">Neu</span>':""}${r.v?`<span class="badge ${VAR[r.v].badge}">${VAR[r.v].n}</span>`:""}</span></span>`:"";
+    return`<div class="slot${n>1&&r===best?" best":""}${glow?" glow":""}" style="--gc:${T.c}">${ckHTML(r.c,r.v)}${lbl}</div>`}).join("");
+}
+function stageFromLog(){const n=Math.max(1,Math.min(perRoll(),S.log.length));const items=S.log.slice(0,n).reverse().map(e=>fromKey(e.k));setStage(items.length?items:[{c:COMMONEST,v:""}])}
+function renderResult(best,tag,all){
+  const el=$("result");
+  if(!S.set.showResult){el.hidden=true;return}
+  el.hidden=false;
+  if(!best){el.innerHTML=`<div><div class="rt" style="color:var(--muted)">Bereit</div><div class="nm">Frisch aus dem Ofen</div></div><div class="od">Drück Rollen oder die Leertaste</div>`;return}
+  const c=best.c,others=(all||[]).filter(r=>r!==best);
+  const total=(all||[best]).reduce((a,r)=>a+crumbVal(r.c,r.v,lastEv),0);
+  const extra=[tag?esc(tag):"",others.length?"Außerdem auf dem Blech: "+others.map(r=>`${esc(r.c.n)}${r.v?" ("+VAR[r.v].n.toLowerCase()+")":""}`).join(", "):""].filter(Boolean).join(" · ");
+  el.innerHTML=`<div><div class="rt">${tierName(c.t)}${c.ev?` · ${EVENTS[c.ev].n}`:""}</div><div class="nm">${esc(c.n)}${best.isNew?'<span class="badge">Neu</span>':""}${varBadge(best.v)}</div></div>
+   <div class="od">${odds(valOf(c,best.v))}<br>+${fmt(total)} Krümel</div>${extra?`<div class="extra">${extra}</div>`:""}`;
+}
+let lastEv=NOEV;
+async function roll(){
+  if(busy||cutOpen)return;busy=true;audio();
+  $("rollBtn").disabled=true;
+  const res=doRoll(),d=rollDelay(res.ev),stage=$("stageCookie"),tray=$("tray");lastEv=res.ev;
+  rpsBuf.push(Date.now());
+  const A=apply(res);const best=A.best;
+  const suspense=S.set.suspense&&(best.c.t>=6||(best.c.t>=4&&(best.isNew||!auto)));
+  let iv=null;
+  if(d>=140||suspense){
+    setStage(res.out.map(()=>({c:COMMONEST,v:""})));stage.className="shuffle";
+    const pool=COOKIES.filter(c=>c.t<=Math.max(3,Math.min(11,Math.floor(Math.log10(res.L)+3))));
+    iv=setInterval(()=>{stage.querySelectorAll(".ck").forEach(e=>{const c=pool[Math.floor(Math.random()*pool.length)];e.className="ck ci"+c.i});sTick()},60);
+    await wait(Math.max(d,suspense?300:0));
+    if(suspense){tray.classList.add("suspense");const top=best.c.t===12?7:best.c.t;
+      for(let t=3;t<=top;t++){tray.style.setProperty("--glow",TIERS[t].c);tone(220*Math.pow(1.12,t),.22,"triangle",.05);await wait(150+(t===top?250:0))}
+      tray.classList.remove("suspense")}
+    clearInterval(iv);
+  }else{await wait(d)}
+  stage.className="";setStage(res.out,best);void stage.offsetWidth;stage.className="pop";
+  tray.style.setProperty("--ray",TIERS[best.c.t].c);tray.classList.toggle("lit",best.c.t>=3||best.v==="s"||best.v==="g");
+  $("trayRoll").textContent="#"+fmt(S.rolls);
+  renderResult(best,res.tag,res.out);
+  if(best.c.t>=3||best.v==="s"||best.v==="g"||best.isNew)sReveal(best.c.t,best.v);
+  // juice
+  const bt=best.c.t===12?6:best.c.t;
+  if(bt>=2||best.v)burst(TIERS[best.c.t].c,Math.min(90,10+bt*8),bt>=4||best.v==="s"||best.v==="g");
+  if(S.set.shake&&bt>=5){tray.classList.remove("shake");void tray.offsetWidth;tray.classList.add("shake");if(bt>=8){document.body.classList.add("bigshake");setTimeout(()=>document.body.classList.remove("bigshake"),650)}}
+  if(bt>=5&&!(best.isNew&&wantsCut(best)))flash(TIERS[best.c.t].c);
+  if(res.nm&&res.nm.t>=4&&res.nm.t>=best.c.t+2){showNearMiss(res.nm);if(res.nm.t>=5)S.all.nearMyth++}
+  if(d>=140||Date.now()-lastUi>250||best.isNew||best.c.t>=3){lastUi=Date.now();renderRollSide();renderRollMeta()}
+  renderTop();checkAch();
+  if(best.c.t>=4&&!best.isNew)toast(`${TIERS[best.c.t].n}: ${best.c.n}`,`${odds(valOf(best.c,best.v))}${best.v?" · "+VAR[best.v].n.toLowerCase():""}`);
+  for(const r of res.out)if(r.isNew&&r!==best&&r.c.t>=4)toast("Neu entdeckt",r.c.n);
+  if(best.isNew&&wantsCut(best))await cutscene(best.c,best.v,true);
+  busy=false;$("rollBtn").disabled=false;
+  if(auto){
+    const m=S.set.mode;
+    if(m==="new"&&A.anyNew){stopAuto();toast("Neuentdeckung!","Auto-Bäcker angehalten.");return}
+    if(m==="x"){xLeft--;updateAutoBtn();if(xLeft<=0){stopAuto();toast("Fertig",`${fmt(S.set.x)} Rolls gebacken.`);return}}
+    setTimeout(roll,0);
+  }
+}
+function showNearMiss(c){const el=$("nearMiss");el.style.color=TIERS[c.t].c;el.textContent="Knapp! Fast "+TIERS[c.t].n;el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
+  const tr=$("tray");tr.style.setProperty("--glow",TIERS[c.t].c);tr.classList.add("suspense");setTimeout(()=>tr.classList.remove("suspense"),220);tone(180,.4,"sawtooth",.035)}
+function wantsCut(b){return S.set.cut&&(b.c.t>=S.set.cutMin||((b.v==="s"||b.v==="g")&&S.set.cutShiny))}
+function flash(col){if(!S.set.cardAnim)return;const f=document.createElement("div");f.className="flash";f.style.setProperty("--cc",col);document.body.appendChild(f);setTimeout(()=>f.remove(),700)}
+function startAuto(){auto=true;if(S.set.mode==="x"){S.set.x=Math.max(1,Math.min(100000,parseInt($("xCount").value,10)||1));xLeft=S.set.x}updateAutoBtn();roll()}
+function stopAuto(){auto=false;updateAutoBtn()}
+function updateAutoBtn(){const b=$("autoBtn");b.setAttribute("aria-pressed",auto);b.textContent=auto?(S.set.mode==="x"?`Stopp (${fmt(xLeft)} übrig)`:"Auto-Bäcker stoppen"):(S.set.mode==="x"?`${fmt(parseInt($("xCount").value,10)||0)}× rollen`:S.set.mode==="new"?"Bis Neuentdeckung rollen":"Auto-Bäcker starten")}
+function renderLog(){
+  const min=+$("logMin").value,ul=$("log");
+  const items=S.log.filter(e=>{const t=fromKey(e.k).c.t;return t>=min}).slice(0,25);
+  if(!items.length){ul.innerHTML=`<li class="empty">Noch nichts gebacken.</li>`;return}
+  ul.innerHTML=items.map(e=>{const{c,v}=fromKey(e.k);return`<li>${ckHTML(c,v)}<span><b>${esc(c.n)}</b>${e.nw?'<span class="badge">Neu</span>':""}${varBadge(v)}<br>${tierName(c.t)}</span><span class="o">#${fmt(e.n)}</span></li>`}).join("");
+}
+function qResetText(){const now=new Date(),mid=new Date(now);mid.setHours(24,0,0,0);const ms=mid-now;$("qReset").textContent=`neu in ${Math.floor(ms/3600000)} h ${Math.floor(ms/60000)%60} min`}
+function renderQuests(){
+  ensureQuests();
+  qResetText();
+  $("quests").innerHTML=S.q.list.map((q,i)=>`<div class="quest${q.done?" done":""}${q.claimed?" claimed":""}"><div><div class="qt">${esc(q.txt)}</div><div class="qr">${fmt(q.rw*(1+S.rebirths*.25))} Krümel${i===2?" + Trank":""} · <span class="num">${fmt(q.prog)}/${fmt(q.n)}</span></div></div>${q.claimed?`<span class="qr">Erledigt</span>`:`<button class="btn ${q.done?"pri":""}" data-claim="${i}" ${q.done?"":"disabled"}>Abholen</button>`}<div class="qb"><i style="width:${q.prog/q.n*100}%"></i></div></div>`).join("")+
+   `<div class="streak"><span>Auftrags-Serie</span><span><b>${S.streak.n}</b> ${S.streak.n===1?"Tag":"Tage"} · Wochenbonus bei 7</span></div>`;
+}
+function nextTarget(){for(const v of ["","s","r","b","g"]){const miss=REG.filter(c=>!S.disc[keyOf(c,v)]);if(miss.length)return{c:miss.reduce((a,b)=>b.N<a.N?b:a),v}}return null}
+const reachable=(c,L)=>!REG.some(o=>o!==c&&o.N>=c.N&&o.N<=L&&(o.N>c.N||o.i<c.i));
+function renderNextFind(){
+  const t=nextTarget(),el=$("nextFind");
+  if(!t){el.innerHTML=`<p class="note" style="margin:0">Du hast wirklich alles gefunden. Respekt.</p>`;return}
+  const ev=evMods(),L=capL(luckMult(ev));
+  const reach=reachable(t.c,L*(ev.tierLuck[t.c.t]||1));
+  const eff=Math.max(1,t.c.N/L)*(t.v==="s"?250/shinyMult(ev):t.v?VAR[t.v].base/variantMult():1);
+  const exp=Math.max(1,Math.round(eff/perRoll()));
+  const target=Math.max(1,Math.floor(t.c.N*.9*100)/100);
+  el.innerHTML=`<div class="nextfind">${ckHTML(t.c,t.v,true)}<div><div class="t1">${tierName(t.c.t)}${t.v?" · "+VAR[t.v].n:""}</div>${reach
+    ?`<div class="t2">Chance mit deinem Glück: ${odds(eff)}<br>Im Schnitt nach etwa ${fmt(exp)} Rolls</div>`
+    :`<div class="nf-warn">Mit deinem Glück von ×${f2(L)} taucht dieser Keks nicht mehr auf, weil seltenere Kekse ihn immer verdrängen.<br><button class="btn" id="nfCap">Glück auf ×${f2(target)} begrenzen</button></div>`}</div></div>`;
+  const b=el.querySelector("#nfCap");if(b)b.onclick=()=>{setLuckCap(target);toast("Glück begrenzt",`Dein Grundglück ist jetzt höchstens ×${f2(target)}. Mit „Voll“ stellst du es zurück.`,true)};
+}
+/* Glück-Regler: logarithmisch von ×1 bis zum vollen Glück; ganz rechts = unbegrenzt */
+function setLuckCap(v){const full=luckMult(evMods());S.set.luckCap=(!v||v>=full-.005)?0:Math.max(1,Math.round(v*100)/100);dirty=true;renderLuckCtl();renderTop();renderNextFind();renderEffects()}
+function renderLuckCtl(){
+  const full=luckMult(evMods()),r=$("luckRange"),cap=S.set.luckCap,on=cap>0&&cap<full-.005;
+  r.disabled=full<=1.01;
+  if(document.activeElement!==r)r.value=on?Math.round(Math.log(cap)/Math.log(full)*1000):1000;
+  $("luckVal").textContent=on?`×${f2(cap)} von ×${f2(full)}`:`voll (×${f2(full)})`;
+  $("luckCtl").classList.toggle("on",on);$("luckFull").disabled=!on;
+}
+function renderRollSide(){renderLog();renderQuests();renderNextFind();renderLuckCtl()}
+function renderRollMeta(){
+  $("mBless").textContent=fmt(1000-(S.rolls%1000));$("mLucky").textContent=fmt(100-(S.rolls%100));
+  $("blessFill").style.width=((S.rolls%1000)/10)+"%";
+  $("baroFill").style.width=(S.baro*100)+"%";$("baroPct").textContent=S.baro>=1?"Bereit":Math.floor(S.baro*100)+" %";$("baro").classList.toggle("full",S.baro>=1);
+}
+function renderEffects(){
+  const out=[],ev=evMods();
+  if(S.set.luckCap>0&&S.set.luckCap<luckMult(ev)-.005)out.push(`<span class="eff">Glück begrenzt <span class="num">×${f2(S.set.luckCap)}</span></span>`);
+  if(talentSpent()>0)out.push(`<span class="eff">Talente <span class="num">${talentSpent()} P.</span></span>`);
+  const gb=gearB();if(gb.luck)out.push(`<span class="eff">Ausrüstung <span class="num">+${pct(gb.luck)} Glück</span></span>`);
+  const labels={luck:"Glückstrank",luck2:"Großer Glückstrank",shiny:"Schillertrank",turbo:"Turbotrank"};
+  for(const k in labels)if(S.eff[k]>0)out.push(`<span class="eff">${labels[k]} <span class="num">${mmss(S.eff[k])}</span></span>`);
+  if(S.oracle>0)out.push(`<span class="eff">Orakel bereit <span class="num">×${S.oracle}</span></span>`);
+  out.push(`<span class="eff" style="background:var(--surface);border-color:var(--line);color:var(--muted)">Schiller 1 zu <span class="num">${fmt(250/shinyMult(ev))}</span> · ${perRoll()} Keks/Roll · ${f2(1000/rollDelay(ev))} Rolls/s max</span>`);
+  $("effects").innerHTML=out.join("");
+}
+let evSig="";
+function renderEventBar(){
+  const bar=$("evBar"),list=activeEvents(),tray=$("tray");
+  const sig=list.map(e=>e.type+(e.global?"g":"p")).join(",");
+  if(sig!==evSig){ // transitions
+    const prev=evSig;evSig=sig;
+    if(prev!==""||sig!==""){for(const e of list)if(!prev.includes(e.type+(e.global?"g":"p")))toast("Ofen-Event: "+EVENTS[e.type].n,EVENTS[e.type].d+(e.global?" · für alle Spieler":" · nur für dich"));}
+    renderTop();if(tab==="roll")renderEffects();
+  }
+  if(list.length){const e=list[0],E=EVENTS[e.type];
+    bar.className="evbar on";bar.style.setProperty("--evc",E.col);tray.classList.add("ev");tray.style.setProperty("--evc",E.col);
+    bar.innerHTML=`<div><span class="tagx">${e.global?"Event":"Dein Event"}</span><span class="en">${E.n}</span><div class="ed">${E.d}${list.length>1?` · dazu ${EVENTS[list[1].type].n}`:""}</div></div><span class="et">noch ${mmss(e.end-Date.now())}</span>`;
+  }else{const n=nextGlobal(Date.now());bar.className="evbar";tray.classList.remove("ev");
+    bar.innerHTML=`<div><span class="en" style="color:var(--muted)">Kein Ofen-Event</span><div class="ed">Events verstärken Glück, Varianten oder bringen exklusive Kekse.</div></div><span class="et">nächstes in ${n?mmss(n.start-Date.now()):"–"}</span>`}
+}
+function renderAura(){
+  const tr=$("tray"),ta=$("trayAura"),ba=$("brandAura");
+  if(S.aura&&validKey(S.aura)){const{c,v}=fromKey(S.aura);tr.classList.add("aura");tr.style.setProperty("--auc",TIERS[c.t].c);ta.hidden=false;ta.innerHTML=ckHTML(c,v)+"<small>AURA</small>";ba.innerHTML=ckHTML(c,v);ba.title="Aura: "+c.n}
+  else{tr.classList.remove("aura");ta.hidden=true;ba.innerHTML=""}
+}
+function renderTop(){
+  $("cRolls").textContent=fmt(S.rolls);
+  $("cBook").textContent=discCount()+"/"+TOTAL;
+  {const full=luckMult(evMods()),eff=capL(full);$("cLuck").textContent="×"+f2(eff)+(eff<full-.005?" ↓":"")}
+  $("cCrumbs").textContent=fmt(S.crumbs);
+}
+
+/* ================= Cutscene ================= */
+function cutscene(c,v,isNew){
+  return new Promise(res=>{
+    cutOpen=true;const T=TIERS[c.t];
+    const el=document.createElement("div");el.className="cut";el.style.setProperty("--cc",v==="g"?"#f7bf3f":c.t===11?"#ffffff":T.c);
+    el.innerHTML=`<div class="bg"></div><div class="rays2"></div><div class="core"><div class="pre">Etwas Seltenes backt…</div><div class="orb"></div><div class="stars"></div></div><button class="skip">Überspringen</button>`;
+    document.body.appendChild(el);
+    const timers=[];let done=false;
+    const finish=()=>{if(done)return;done=true;timers.forEach(clearTimeout);el.remove();cutOpen=false;res()};
+    const reveal=()=>{
+      el.classList.add("rev");
+      el.querySelector(".core").innerHTML=`<div class="ckbig">${ckHTML(c,v)}</div><div class="cr">${T.n}${v?" · "+VAR[v].n:""}</div><div class="cn">${esc(c.n)}</div><div class="co">${odds(valOf(c,v))}${isNew?" · Neu im Sammelbuch":""}</div>`;
+      el.querySelector(".ckbig .ck").style.width="100%";el.querySelector(".ckbig .ck").style.height="100%";
+      sReveal(c.t,v);el.querySelector(".skip").textContent="Weiter";
+      timers.push(setTimeout(finish,2600+Math.min(c.t,11)*120));
+    };
+    const stars=el.querySelector(".stars"),n=Math.max(1,Math.min(c.t,11)-2);
+    for(let i=0;i<n;i++)timers.push(setTimeout(()=>{const sp=document.createElement("span");sp.textContent="✦";stars.appendChild(sp);tone(300+i*70,.18,"sine",.05)},250+i*220));
+    timers.push(setTimeout(reveal,400+n*220+300));
+    el.addEventListener("click",()=>{if(el.classList.contains("rev"))finish();else{timers.forEach(clearTimeout);timers.length=0;reveal()}});
+    el.querySelector(".skip").addEventListener("click",e=>{e.stopPropagation();finish()});
+  });
+}
+
+/* ================= Toasts & modals ================= */
+function toast(title,body,force){if(!S.set.toasts&&!force)return;const t=document.createElement("div");t.className="toast";t.innerHTML=`<b>${esc(title)}</b>${body?esc(body):""}`;$("toasts").appendChild(t);setTimeout(()=>t.remove(),4200);const all=$("toasts").children;if(all.length>4)all[0].remove()}
+function modal(title,html,onMount){
+  const o=document.createElement("div");o.className="overlay";
+  o.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${esc(title)}</h2><button class="x" aria-label="Schließen">×</button></div><div class="mb">${html}</div></div>`;
+  const close=()=>{o.remove();document.removeEventListener("keydown",kd)};const kd=e=>{if(e.key==="Escape")close()};
+  o.addEventListener("click",e=>{if(e.target===o)close()});o.querySelector(".x").onclick=close;document.addEventListener("keydown",kd);
+  document.body.appendChild(o);if(onMount)onMount(o,close);return close;
+}
+function confirmBox(title,text,okLabel,onOk,danger){
+  modal(title,`<p style="margin:0;color:var(--muted)">${text}</p><div class="btnrow"><button class="btn" data-a="no">Abbrechen</button><button class="btn ${danger?"danger":"pri"}" data-a="ok">${esc(okLabel)}</button></div>`,(o,close)=>{
+    o.querySelector('[data-a="no"]').onclick=close;o.querySelector('[data-a="ok"]').onclick=()=>{close();onOk()}});
+}
+function cookieDetail(c,v){
+  const k=keyOf(c,v),have=!!S.disc[k],ev=evMods(),L=capL(luckMult(ev));
+  const avail=c.ev?`Nur während <b>${EVENTS[c.ev].n}</b>`:"Immer";
+  const rows=VKEYS.map(x=>{const kk=keyOf(c,x);return`<tr><td>${VAR[x].n}</td><td class="r">${odds(valOf(c,x))}</td><td class="r">${S.disc[kk]?fmt(S.inv[kk]||0):"–"}</td></tr>`}).join("");
+  modal(have?c.n:"Unbekannter Keks",`<div class="detail">${ckHTML(c,v,!have)}<dl class="kv">
+    <dt>Seltenheit</dt><dd>${tierName(c.t)}${v?" · "+VAR[v].n:""}</dd>
+    <dt>Grundchance</dt><dd>${odds(valOf(c,v))}</dd>
+    <dt>Mit deinem Glück</dt><dd>${odds(Math.max(1,c.N/(L*(ev.tierLuck[c.t]||1)))*VAR[v].base)}</dd>
+    <dt>Verfügbar</dt><dd style="font-family:var(--body)">${avail}</dd>
+    <dt>Wert</dt><dd>${fmt(crumbVal(c,v))} Krümel</dd></dl></div>
+    <div class="tscroll" style="margin-top:14px"><table class="t" style="min-width:0"><thead><tr><th>Variante</th><th class="r">Chance</th><th class="r">Besitz</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="btnrow">${have?`<button class="btn" data-a="aura">Als Aura tragen</button><button class="btn pri" data-a="cut">Cutscene abspielen</button>`:""}</div>`,(o,close)=>{
+      const b=o.querySelector('[data-a="cut"]');if(b)b.onclick=()=>{close();cutscene(c,v,false)};
+      const a=o.querySelector('[data-a="aura"]');if(a)a.onclick=()=>{setAura(k);close()}});
+}
+
+/* ================= Inventory ================= */
+function renderInv(){
+  $("invPots").innerHTML=POT.map(p=>`<div class="pot">${potIcon(p.col)}<div><div class="n">${p.n} <span class="num" style="color:var(--caramel)">×${S.pots[p.k]||0}</span></div><div class="s">${p.d}</div></div><button class="btn pri" data-use="${p.k}" ${S.pots[p.k]>0?"":"disabled"}>Benutzen</button></div>`).join("");
+  const tf=$("invTier").value,vf=$("invVar").value,q=$("invSearch").value.trim().toLowerCase(),so=$("invSort").value;
+  let rows=Object.keys(S.inv).filter(k=>S.inv[k]>0&&validKey(k)).map(k=>({k,...fromKey(k),cnt:S.inv[k]}));
+  if(tf!=="all")rows=rows.filter(r=>r.c.t===+tf);
+  if(vf!=="all")rows=rows.filter(r=>r.v===vf);
+  if(q)rows=rows.filter(r=>r.c.n.toLowerCase().includes(q));
+  rows.sort(so==="count"?(a,b)=>b.cnt-a.cnt:so==="name"?(a,b)=>a.c.n.localeCompare(b.c.n,"de"):(a,b)=>valOf(b.c,b.v)-valOf(a.c,a.v));
+  $("invList").innerHTML=rows.length?rows.slice(0,300).map(r=>`<div class="invrow">${ckHTML(r.c,r.v)}<div><div class="n">${esc(r.c.n)}${varBadge(r.v)}</div><div class="s">${tierName(r.c.t)} · ${odds(valOf(r.c,r.v))} · ${fmt(crumbVal(r.c,r.v))} Krümel/Stück</div></div><div class="c">×${fmt(r.cnt)}</div><button class="btn" data-sell="${r.k}" ${r.cnt>1?"":"disabled"}>${r.cnt>1?`${fmt(r.cnt-1)} verkaufen`:"Letztes Stück"}</button></div>`).join(""):`<p class="note">Keine Kekse gefunden. Zeit zum Rollen.</p>`;
+}
+function sellKey(k){const n=(S.inv[k]||0)-1;if(n<=0)return 0;const{c,v}=fromKey(k);const val=crumbVal(c,v)*n;S.inv[k]=1;S.crumbs+=val;S.all.crumbs+=val;S.all.sold+=n;return val}
+function usePot(k){if(!(S.pots[k]>0))return;S.pots[k]--;S.all.potions++;const p=POT.find(p=>p.k===k);
+  if(k==="oracle")S.oracle++;
+  else if(k==="ignite"){const type=Math.random()<.1?"cosmic":EV_NORMAL[Math.floor(Math.random()*5)];S.pev={type,until:Date.now()+120000};evSig="__";}
+  else S.eff[k]+=p.dur*1000;
+  toast(p.n+" aktiv",k==="ignite"?EVENTS[S.pev.type].n+" für 2 Minuten":p.d);qHook("pot",1);dirty=true;renderAll();renderEventBar();checkAch()}
+
+/* ================= Book ================= */
+let bookView="";
+function renderBook(){
+  const v=bookView;
+  $("bookSeg").innerHTML=VKEYS.map(x=>{const got=COOKIES.filter(c=>S.disc[keyOf(c,x)]).length;return`<button data-v="${x}" aria-pressed="${x===v}">${VAR[x].n} <span class="num" style="opacity:.7">${got}</span></button>`}).join("");
+  $("bookLead").textContent=`${discCount()} von ${TOTAL} Einträgen entdeckt (${(discCount()/TOTAL*100).toFixed(1).replace(".",",")} %). Jeder Keks gibt es in fünf Varianten. Tippe auf einen Keks für Details.`;
+  $("book").innerHTML=TIERS.map((T,t)=>{const cs=COOKIES.filter(c=>c.t===t);const got=cs.filter(c=>S.disc[keyOf(c,v)]).length;
+    return`<div class="tiersec"><div class="tierhead"><span class="tn" style="color:${T.c}">${T.prism?`<span class="prism-text">${T.n}</span>`:t===12?"Event-Kekse":T.n}</span><span class="ti">${got}/${cs.length} · ${odds(Math.min(...cs.map(c=>c.N))*VAR[v].base)} bis ${odds(Math.max(...cs.map(c=>c.N))*VAR[v].base)}${got===cs.length?" · vollständig":""}</span></div>
+    <div class="grid">${cs.map(c=>{const k=keyOf(c,v),h=!!S.disc[k];return`<button class="cell${t>=7?" cosmic":""}${h?" have":""}" data-ck="${k}">${h?`<span class="cnt">×${fmt(S.inv[k]||0)}</span>`:""}${ckHTML(c,v,!h)}<span class="n">${h?esc(c.n):"???"}</span><span class="o">${c.ev?EVENTS[c.ev].n:odds(valOf(c,v))}</span></button>`}).join("")}</div></div>`}).join("");
+}
+
+/* ================= Workshop ================= */
+const ownCount=()=>Object.keys(S.gear.own).length;
+function bonusTxt(b){const p=[];if(b.luck)p.push(`+${pct(b.luck)} Glück`);if(b.shiny)p.push(`+${pct(b.shiny)} Schiller-Chance`);if(b.speed)p.push(`+${pct(b.speed)} Tempo`);if(b.crumbs)p.push(`+${pct(b.crumbs)} Krümel`);if(b.variant)p.push(`+${pct(b.variant)} Varianten`);if(b.event)p.push(`Events ${pct(b.event)} stärker`);return p.join(" · ")}
+function shinyTotal(){let n=0;for(const k in S.inv)if(k.endsWith("s"))n+=S.inv[k];return n}
+function ingHave(name){return name==="*s"?shinyTotal():(S.inv[keyOf(byName(name),"")]||0)}
+function canCraft(r){return r.ing.every(([n,q])=>ingHave(n)>=q)}
+function craft(id){const r=RECIPES.find(x=>x.id===id);if(!r||S.gear.own[id]||!canCraft(r))return;
+  for(const[n,q]of r.ing){if(n==="*s"){let left=q;const ks=Object.keys(S.inv).filter(k=>k.endsWith("s")&&S.inv[k]>0).sort((a,b)=>valKey(a)-valKey(b));for(const k of ks){const t=Math.min(left,S.inv[k]);S.inv[k]-=t;left-=t;if(!left)break}}
+    else{const k=keyOf(byName(n),"");S.inv[k]-=q}}
+  S.gear.own[id]=1;S.all.crafted++;if(!S.gear.eq[r.slot])S.gear.eq[r.slot]=id;
+  toast(r.n+" hergestellt",bonusTxt(r.b));tone(660,.2,"triangle",.06);tone(990,.3,"triangle",.06,.1);dirty=true;checkAch();renderAll()}
+function equip(id){const r=RECIPES.find(x=>x.id===id);if(!r||!S.gear.own[id])return;S.gear.eq[r.slot]=S.gear.eq[r.slot]===id?null:id;dirty=true;checkAch();renderAll()}
+function setAura(k){S.aura=S.aura===k?null:k;dirty=true;renderAura();checkAch();if(tab==="craft")renderCraft();lbReport(true);toast(S.aura?"Aura ausgerüstet":"Aura abgelegt",S.aura?fromKey(k).c.n:"")}
+function renderCraft(){
+  $("slots").innerHTML=Object.keys(SLOTS).map(s=>{const r=RECIPES.find(x=>x.id===S.gear.eq[s]);
+    return`<div class="slotcard${r?" on":""}">${gearIcon(s,r?r.col:"#4a3326",48)}<div><div class="sl">${SLOTS[s]}</div><div class="sn">${r?r.n:"Leer"}</div><div class="sb">${r?bonusTxt(r.b):""}</div></div></div>`}).join("");
+  $("recipes").innerHTML=RECIPES.map(r=>{const own=!!S.gear.own[r.id],eq=S.gear.eq[r.slot]===r.id,ok=canCraft(r);
+    const ing=r.ing.map(([n,q])=>{const h=ingHave(n);const c=n==="*s"?null:byName(n);const known=n==="*s"||S.disc[keyOf(c,"")]||S.gear.own[r.id];
+      return`<div>${c?ckHTML(c,"",!known):ckHTML(COMMONEST,"s")}<span>${n==="*s"?"Schillernde Kekse (beliebig)":known?esc(n):"??? ("+TIERS[c.t].n+")"}</span><span class="${h>=q?"ok":"no"}">${fmt(Math.min(h,q))}/${q}</span></div>`}).join("");
+    return`<div class="card"><div class="top2">${gearIcon(r.slot,r.col)}<div><div class="n">${r.n}</div><div class="s">${SLOTS[r.slot]}</div><div class="bonus">${bonusTxt(r.b)}</div></div></div>
+      ${own?"":`<div class="ing">${ing}</div>`}
+      <div class="foot">${own?`<span class="s">${eq?"Ausgerüstet":"Im Besitz"}</span><button class="btn ${eq?"":"pri"}" data-equip="${r.id}">${eq?"Ablegen":"Ausrüsten"}</button>`:`<span class="s">${ok?"Alle Zutaten da":"Zutaten fehlen"}</span><button class="btn pri" data-craft="${r.id}" ${ok?"":"disabled"}>Herstellen</button>`}</div></div>`}).join("");
+  const keys=Object.keys(S.disc).filter(validKey).sort((a,b)=>valKey(b)-valKey(a)).slice(0,24);
+  if(S.aura&&validKey(S.aura)&&!keys.includes(S.aura))keys.unshift(S.aura);
+  $("auraPick").innerHTML=keys.length?keys.map(k=>{const{c,v}=fromKey(k);return`<button data-aura="${k}" aria-pressed="${S.aura===k}">${ckHTML(c,v)}<span>${esc(c.n)}</span><span style="color:${TIERS[c.t].c};font-size:10px">${TIERS[c.t].n}${v?" · "+VAR[v].n:""}</span></button>`}).join(""):`<p class="note">Roll erst ein paar Kekse.</p>`;
+}
+
+/* ================= Shop ================= */
+function renderShop(){
+  $("shopUp").innerHTML=UPG.map(u=>{const l=S.up[u.k],max=l>=u.max,cost=u.cost(l);
+    return`<div class="card"><div class="top2">${upIcon(u.ic)}<div><div class="n">${u.n}</div><div class="s">${u.d}</div></div></div>
+    <div class="lv">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?"on":""}"></i>`).join("")}</div>
+    <div class="foot"><span class="s">Stufe ${l}/${u.max}</span>${max?`<span class="s">Maximal</span>`:`<button class="btn pri" data-buyup="${u.k}" ${S.crumbs>=cost?"":"disabled"}><span class="num">${fmt(cost)}</span> Krümel</button>`}</div></div>`}).join("");
+  $("shopPot").innerHTML=POT.map(p=>`<div class="card"><div class="top2">${potIcon(p.col,true)}<div><div class="n">${p.n}</div><div class="s">${p.d}</div></div></div>
+    <div class="foot"><span class="s">Im Inventar: <span class="num">${S.pots[p.k]||0}</span></span><button class="btn pri" data-buypot="${p.k}" ${S.crumbs>=p.cost?"":"disabled"}><span class="num">${fmt(p.cost)}</span> Krümel</button></div></div>`).join("");
+}
+
+/* ================= Stats & achievements ================= */
+const ACH=[
+ ["first","Erster Biss","Deinen ersten Keks rollen",()=>S.all.rolls>=1,20],
+ ["r100","Hobbybäcker","100 Rolls (All-Time)",()=>S.all.rolls>=100,100],
+ ["r1k","Bäckergeselle","1.000 Rolls (All-Time)",()=>S.all.rolls>=1000,500],
+ ["r10k","Bäckermeister","10.000 Rolls (All-Time)",()=>S.all.rolls>=1e4,3000],
+ ["r100k","Großbäckerei","100.000 Rolls (All-Time)",()=>S.all.rolls>=1e5,20000],
+ ["r1m","Keksfabrik","1.000.000 Rolls (All-Time)",()=>S.all.rolls>=1e6,150000],
+ ...TIERS.slice(2,12).map((T,i)=>["t"+(i+2),T.n+"!",`Einen ${T.n.toLowerCase()}en Keks finden`,()=>S.all.tier[i+2]>0,Math.round(40*Math.pow(3,i))]),
+ ["ev1","Eventbäcker","Einen Event-Keks finden",()=>S.all.tier[12]>0,1500],
+ ["sh1","Es glitzert","Einen schillernden Keks finden",()=>S.all.vars.s>=1,200],
+ ["sh10","Glitzersammler","10 schillernde Kekse",()=>S.all.vars.s>=10,1500],
+ ["sh100","Discokugel","100 schillernde Kekse",()=>S.all.vars.s>=100,12000],
+ ["gold1","Goldstück","Einen goldenen Keks finden",()=>S.all.vars.g>=1,400],
+ ["big1","Riesenhunger","Einen riesigen Keks finden",()=>S.all.vars.r>=1,150],
+ ["burn1","Angebrannt","Einen verbrannten Keks finden",()=>S.all.vars.b>=1,50],
+ ["d10","Erste Seiten","10 % des Sammelbuchs",()=>discCount()>=TOTAL*.1,800],
+ ["d25","Viertel voll","25 % des Sammelbuchs",()=>discCount()>=TOTAL*.25,8000],
+ ["d50","Halbzeit","50 % des Sammelbuchs",()=>discCount()>=TOTAL*.5,60000],
+ ["d100","Keks-Enzyklopädie","Das ganze Sammelbuch",()=>discCount()>=TOTAL,2000000],
+ ["tier","Vollständig","Eine Seltenheit komplett sammeln",()=>TIERS.slice(0,12).some((_,t)=>tierComplete(t,"")),300],
+ ["bless","Gesegnet","Einen gesegneten Roll erleben",()=>S.all.blessed>=1,500],
+ ["baro","Druckausgleich","Das Glücksbarometer entladen",()=>S.all.baro>=1,300],
+ ["nm","Knapp daneben","Einen Beinahe-Treffer ab Mythisch erleben",()=>S.all.nearMyth>=1,200],
+ ["pot10","Trankmischer","10 Tränke benutzen",()=>S.all.potions>=10,800],
+ ["cr10k","Krümelmonster","10.000 Krümel verdienen (All-Time)",()=>S.all.crumbs>=1e4,1000],
+ ["cr1m","Krümelmillionär","1.000.000 Krümel verdienen (All-Time)",()=>S.all.crumbs>=1e6,50000],
+ ["craft1","Handwerker","Eine Ausrüstung herstellen",()=>ownCount()>=1,500],
+ ["gear4","Voll ausgerüstet","Alle vier Slots belegt",()=>Object.values(S.gear.eq).every(Boolean),5000],
+ ["craftall","Meisterschmied","Alle Rezepte hergestellt",()=>ownCount()>=RECIPES.length,100000],
+ ["aura","Ausstrahlung","Eine Aura tragen",()=>!!S.aura,100],
+ ["q1","Auftrag erledigt","Einen Tagesauftrag abschließen",()=>S.all.quests>=1,100],
+ ["streak7","Eine Woche Ofen","7 Tage Auftrags-Serie",()=>S.streak.best>=7,20000],
+ ["rb1","Wiedergeboren","Deinen ersten Rebirth",()=>S.rebirths>=1,1000],
+ ["rb5","Kreislauf","5 Rebirths",()=>S.rebirths>=5,10000],
+ ["tal","Talentiert","Einen Talentpunkt vergeben",()=>talentSpent()>0,500],
+ ["up","Aufgerüstet","Ein Upgrade auf Maximalstufe",()=>UPG.some(u=>S.up[u.k]>=u.max),5000],
+];
+function checkAch(){for(const[id,n,,test,rw]of ACH){if(!S.ach[id]&&test()){S.ach[id]=Date.now();S.crumbs+=rw;toast("Achievement: "+n,`+${fmt(rw)} Krümel`);tone(880,.2,"triangle",.06);tone(1175,.3,"triangle",.06,.12);dirty=true}}}
+function renderStats(){
+  const bk=S.all.bestK&&validKey(S.all.bestK)?fromKey(S.all.bestK):null,rb=S.run.bestK&&validKey(S.run.bestK)?fromKey(S.run.bestK):null;
+  const h=Math.floor(S.all.playMs/3600000),m=Math.floor(S.all.playMs/60000)%60,ev=evMods(),L=capL(luckMult(ev));
+  const st=[["Rolls (Durchlauf)",fmt(S.rolls)],["Rolls (All-Time)",fmt(S.all.rolls)],["Entdeckt",`${discCount()}/${TOTAL}`],["Schillernde (All-Time)",fmt(S.all.vars.s)],
+    ["Goldene · Riesige · Verbrannte",`${fmt(S.all.vars.g)} · ${fmt(S.all.vars.r)} · ${fmt(S.all.vars.b)}`],
+    ["Bester Keks",bk?`${bk.c.n}${bk.v?" ("+VAR[bk.v].n+")":""}`:"–"],["Bester im Durchlauf",rb?`${rb.c.n}${rb.v?" ("+VAR[rb.v].n+")":""}`:"–"],["Glück",`×${f2(L)}`],["Krümel verdient",fmt(S.all.crumbs)],
+    ["Tränke benutzt",fmt(S.all.potions)],["Gesegnete Rolls",fmt(S.all.blessed)],["Rolls während Events",fmt(S.all.evRolls)],["Aufträge erledigt",fmt(S.all.quests)],["Rebirths",fmt(S.rebirths)],["Spielzeit",`${h} h ${m} min`]];
+  $("statGrid").innerHTML=st.map(([a,b])=>`<div class="stat"><small>${a}</small><b>${esc(b)}</b></div>`).join("");
+  $("tierTable").innerHTML=`<thead><tr><th>Seltenheit</th><th class="r">Chance ab</th><th class="r">Mit deinem Glück</th><th class="r">Gerollt (All-Time)</th><th class="r">Entdeckt (normal)</th></tr></thead><tbody>${TIERS.map((T,t)=>{const cs=COOKIES.filter(c=>c.t===t);const mn=Math.min(...cs.map(c=>c.N));return`<tr><td>${tierName(t)}</td><td class="r">${odds(mn)}</td><td class="r">${t===12?"nur bei Events":odds(Math.max(1,mn/(L*(ev.tierLuck[t]||1))))}</td><td class="r">${fmt(S.all.tier[t])}</td><td class="r">${cs.filter(c=>S.disc[keyOf(c,"")]).length}/${cs.length}</td></tr>`}).join("")}</tbody>`;
+  const done=ACH.filter(a=>S.ach[a[0]]).length;$("achCount").textContent=`${done}/${ACH.length}`;
+  $("achGrid").innerHTML=ACH.map(([id,n,d,,rw])=>`<div class="ach${S.ach[id]?" done":""}"><div class="medal">${S.ach[id]?"✓":"?"}</div><div><div class="n">${n}</div><div class="s">${d} · ${fmt(rw)} Krümel</div></div></div>`).join("");
+}
+
+/* ================= Rebirth & talents ================= */
+function renderRebirth(){
+  const g=rebirthGain();
+  $("rbNow").textContent=fmt(S.tp);$("rbGain").textContent=fmt(g);$("rbCount").textContent=fmt(S.rebirths);
+  $("rbBtn").disabled=g<=0;$("rbReq").textContent=g<=0?"Sammle zuerst eine Seltenheit vollständig.":"";
+  $("talGrid").innerHTML=TAL.map(t=>{const l=S.tal[t.k],max=l>=t.max;return`<div class="tal"><div class="n">${t.n}</div><div class="s">${t.d} pro Stufe</div>
+    <div class="lv" style="display:flex;gap:2px">${t.max<=20?Array.from({length:t.max},(_,i)=>`<i style="flex:1;height:5px;border-radius:3px;background:${i<l?"var(--caramel)":"var(--raised2)"}"></i>`).join(""):`<i style="flex:1;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--caramel) ${l/t.max*100}%,var(--raised2) 0)"></i>`}</div>
+    <div class="foot"><span class="s">Stufe ${l}/${t.max}</span>${max?`<span class="s">Maximal</span>`:`<button class="btn pri" data-tal="${t.k}" ${S.tp>=t.cost?"":"disabled"}>${t.cost} ${t.cost>1?"Punkte":"Punkt"}</button>`}</div></div>`}).join("");
+  $("talReset").disabled=talentSpent()===0;
+  $("rbMatrix").innerHTML=`<thead><tr><th>Seltenheit</th>${VKEYS.map(v=>`<th class="r" style="text-align:center">${VAR[v].n}</th>`).join("")}</tr></thead><tbody>${TIERS.slice(0,12).map((T,t)=>`<tr><td>${tierName(t)}</td>${VKEYS.map(v=>{const cs=COOKIES.filter(c=>c.t===t);const n=cs.filter(c=>S.disc[keyOf(c,v)]).length;return`<td class="c ${n===8?"ok":"no"}">${n===8?"✓ "+(v==="s"?"+2":"+1"):n+"/8"}</td>`}).join("")}</tr>`).join("")}</tbody>`;
+}
+function doRebirth(){
+  const g=rebirthGain();if(g<=0)return;stopAuto();
+  S.tp+=g;S.rebirths++;
+  S.rolls=0;S.inv={};S.disc={};S.crumbs=S.tal.start*500;S.up={luck:0,speed:0,multi:S.tal.keepmulti?1:0,shiny:0};S.pots={luck:0,luck2:0,shiny:0,turbo:0,oracle:0,ignite:0};S.eff={luck:0,luck2:0,shiny:0,turbo:0};S.oracle=0;S.baro=0;S.run={bestK:null};S.log=[];
+  dirty=true;save();checkAch();renderAll();renderResult(null);stageFromLog();
+  toast("Rebirth geschafft",`+${g} Talentpunkte. Verteile sie im Talentbaum.`);flash("#f0a24a");burst("#f0a24a",80,true);
+  lbReport(true);cloudSave(true);
+}
+
+/* ================= Settings ================= */
+function openSettings(){
+  const sw=(k,b,s)=>`<div class="setrow"><div class="l"><b>${b}</b><span>${s}</span></div><input type="checkbox" class="sw" id="set-${k}" data-set="${k}" ${S.set[k]?"checked":""}></div>`;
+  modal("Einstellungen",`
+   <div class="setsec">Sound</div>${sw("sound","Sound-Effekte","Töne beim Rollen und bei seltenen Keksen")}${sw("music","Musik","Ruhige Ofen-Musik im Hintergrund, heller während Events")}
+   <div class="setsec">Spannung</div>${sw("suspense","Aufbau vor seltenen Keksen","Der Ofen glüht die Seltenheiten hoch, bevor ein seltener Keks erscheint")}${sw("shake","Wackeln","Das Blech wackelt bei Mythisch und höher")}${sw("particles","Krümel-Partikel","Krümel und Funken beim Aufdecken")}
+   <div class="setsec">Cutscenes</div>${sw("cut","Cutscenes","Animiertes Intro bei neuen seltenen Keksen")}
+   <div class="setrow"><div class="l"><b>Ab Seltenheit</b><span>Cutscene erst ab dieser Seltenheit</span></div><select class="sm" id="set-cutMin">${TIERS.slice(0,12).map((T,t)=>`<option value="${t}" ${S.set.cutMin===t?"selected":""}>${t?"Ab "+T.n:"Alle"}</option>`).join("")}</select></div>
+   ${sw("cutShiny","Schillernd und golden immer","Cutscene bei neuen schillernden und goldenen Keksen, egal welche Seltenheit")}
+   <div class="setsec">Anzeige</div>${sw("toasts","Benachrichtigungen","Einblendungen für Achievements, Funde und Events")}${sw("feedToasts","Live-Funde anderer Spieler","Einblendung bei Funden ab 1 zu 1.000.000 (höchstens alle 30 Sekunden)")}${sw("pulse","Roll-Knopf-Puls","Leuchtende Pulsanimation am Roll-Knopf")}${sw("cardAnim","Effekte","Aufblitzen und animierte Karten bei kosmischen Keksen")}${sw("showResult","Ergebnis-Anzeige","Letzten Keks unter dem Blech anzeigen")}
+   <div class="setsec">Auf anderem Gerät weiterspielen</div>${accountHTML()}
+   <div class="setsec">Spielstand</div>
+   <div class="btnrow" style="justify-content:flex-start"><button class="btn danger" id="resetBtn">Spielstand zurücksetzen</button></div>`,(o,close)=>{
+     o.querySelectorAll("[data-set]").forEach(i=>i.onchange=()=>{S.set[i.dataset.set]=i.checked;applySettings();if(i.dataset.set==="music"){audio();setMusic()}dirty=true});
+     o.querySelector("#set-cutMin").onchange=e=>{S.set.cutMin=+e.target.value;dirty=true};wireAccount(o,close);
+     o.querySelector("#resetBtn").onclick=()=>{close();confirmBox("Zurücksetzen?","Alle Fortschritte, Rolls, Kekse, Ausrüstung, Talente, Rebirths und Achievements werden unwiderruflich gelöscht.","Ja, zurücksetzen",()=>{stopAuto();const lb=S.lb;S=fresh();S.lb=lb;S.lastSeen=Date.now();save();renderAll();renderResult(null);stageFromLog();renderAura();toast("Zurückgesetzt","Neuer Teig, neues Glück.")},true)};
+   });
+}
+function applySettings(){document.body.classList.toggle("pulse",S.set.pulse);document.body.classList.toggle("cardanim",S.set.cardAnim);$("result").hidden=!S.set.showResult;setMusic()}
+
+/* ================= Tabs ================= */
+let tab="roll";
+const TABS=["roll","inv","book","craft","shop","stats","rebirth","lb"];
+function showTab(t){tab=t;if(t==="lb")fetchLB(false);document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  TABS.forEach(x=>{$("tab-"+x).hidden=x!==t});renderTab();try{localStorage.setItem(KEY+"_tab",t)}catch(e){}}
+function renderTab(){({roll:()=>{renderRollSide();renderRollMeta();renderEffects()},inv:renderInv,book:renderBook,craft:renderCraft,shop:renderShop,stats:renderStats,rebirth:renderRebirth,lb:renderLB})[tab]()}
+function renderAll(){renderTop();renderTab()}
+
+/* ================= Cloud: leaderboard, feed, save ================= */
+let DB=null,UID=null,LB=[],lbCat="total",lbState="loading",lastReport=0,lastCloud=0,FEED=[];
+const BOOT=Date.now();
+const N0=v=>{v=Number(v);return isFinite(v)&&v>=0?Math.floor(v):0};
+const safeKey=k=>typeof k==="string"&&validKey(k)?k:null;
+function lbPayload(){const bk=S.all.bestK&&validKey(S.all.bestK)?S.all.bestK:null;return{name:S.lb.name.slice(0,18),disc:discCount(),discPeak:S.discPeak,rolls:S.all.rolls,shinies:S.all.vars.s,bestN:bk?valKey(bk):0,bestK:bk,aura:S.aura&&validKey(S.aura)?S.aura:null,rebirths:S.rebirths,at:Date.now()}}
+async function lbReport(force){if(!DB||!UID||!S.lb.joined)return;if(!force&&Date.now()-lastReport<300000)return;lastReport=Date.now();try{await DB.doc("scores/"+UID).set(lbPayload())}catch(e){}}
+let lastUpAt=0;
+// force=true: Zeitsperre ignorieren, aber nur hochladen, wenn sich lokal etwas geändert hat. force=2: immer hochladen.
+async function cloudSave(force){if(!DB||!UID)return;if(!force&&Date.now()-lastCloud<(isGoogle()?120000:300000))return;if(force!==2&&(S.savedAt||0)<=lastUpAt&&!dirty)return;
+  lastCloud=Date.now();try{if(dirty){save();dirty=false}const at=Math.max(Date.now(),S.savedAt||0);S.savedAt=at;await DB.doc(`saves/${UID}`).set({json:JSON.stringify(S),at});lastUpAt=at}catch(e){}}
+let feedPending=null,lastFeedPost=0;
+function feedPost(r){if(!DB||!UID)return;const k=keyOf(r.c,r.v);if(!feedPending||valKey(k)>valKey(feedPending))feedPending=k;flushFeed()}
+async function flushFeed(){if(!feedPending||!DB||!UID||Date.now()-lastFeedPost<30000)return;const k=feedPending;feedPending=null;lastFeedPost=Date.now();
+  const id=UID+"_"+(S.feedSeq++%8);try{await DB.doc("feed/"+id).set({uid:UID,name:S.lb.joined?S.lb.name.slice(0,18):"",k,at:Date.now()})}catch(e){}}
+const TK_WIN=180000,TK_MIN=6500;let tkShown=new Set(),tkCur=undefined,tkSwap=0;
+const tkId=f=>f.id+"@"+f.at;
+function renderTicker(){const tk=$("ticker");if(!DB){tk.hidden=true;return}tk.hidden=false;tickerStep(true)}
+function tickerStep(soft){
+  if(!DB)return;const now=Date.now();
+  const recent=FEED.filter(f=>now-f.at<=TK_WIN&&f.at<=now+60000);
+  const unseen=recent.filter(f=>!tkShown.has(tkId(f)));
+  const more=n=>{$("tickerMore").textContent=n>0?`+${n} in der Warteschlange`:""};
+  if(tkCur!==undefined&&now-tkSwap<TK_MIN){updTkTime();more(unseen.length);return}
+  if(unseen.length){const best=unseen.reduce((a,b)=>valKey(b.k)>valKey(a.k)?b:a);tkShown.add(tkId(best));showTk(best);more(unseen.length-1);return}
+  more(0);if(tkCur===undefined||(tkCur&&now-tkCur.at>TK_WIN))showTk(null);else updTkTime();
+}
+function updTkTime(){const t=$("tickerSlot").querySelector(".item:not(.leave) .t");if(t&&tkCur)t.textContent=timeAgo(tkCur.at)}
+function showTk(f){
+  if(f===null&&tkCur===null)return;
+  tkCur=f;tkSwap=Date.now();const slot=$("tickerSlot");
+  slot.querySelectorAll(".item").forEach(o=>{o.classList.add("leave");setTimeout(()=>o.remove(),550)});
+  const el=document.createElement("div");el.className="item enter"+(f?"":" idle");
+  if(f){const{c,v}=fromKey(f.k);el.innerHTML=`${ckHTML(c,v)}<span class="txt"><b class="fn"></b> hat <b style="color:${TIERS[c.t].c}">${esc(c.n)}${v?" ("+VAR[v].n.toLowerCase()+")":""}</b> gebacken · ${odds(valOf(c,v))}</span><span class="t">${timeAgo(f.at)}</span>`;
+    el.querySelector(".fn").textContent=f.uid===UID?"Du":(f.name||"Ein Bäcker")}
+  else el.innerHTML=`<span class="txt">Gerade keine besonderen Funde. Alles ab 1 zu 50.000 erscheint hier.</span>`;
+  slot.appendChild(el);requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove("enter")));
+}
+const CATS=[["total","Gesamt"],["disc","Entdeckungen"],["rolls","Rolls"],["shinies","Schillernde"],["bestN","Bester Keks"],["rebirths","Rebirths"]];
+function ranked(){
+  const rows=LB.map(d=>({...d}));
+  for(const[k]of CATS.slice(1)){const key=k==="disc"?"discPeak":k;const sorted=[...rows].sort((a,b)=>(b[key]||0)-(a[key]||0));let rank=0,prev=null;sorted.forEach((r,i)=>{if(r[key]!==prev){rank=i+1;prev=r[key]}r["rk_"+k]=rank})}
+  rows.forEach(r=>r.score=CATS.slice(1).reduce((s,[k])=>s+r["rk_"+k],0));
+  return rows;
+}
+function renderLB(){
+  const body=$("lbBody");
+  if(lbState==="loading"){body.innerHTML=`<p class="note">Rangliste wird geladen…</p>`;return}
+  if(lbState==="off"){body.innerHTML=`<div class="panel"><b>Rangliste gerade nicht erreichbar</b><p class="note" style="margin:6px 0 0">Die Online-Funktionen sind nicht eingerichtet oder gerade nicht erreichbar. Dein Spiel läuft ganz normal weiter und wird lokal gespeichert.</p></div>`;return}
+  body.innerHTML="";
+  if(!S.lb.joined){
+    const p=document.createElement("div");p.className="panel";p.style.maxWidth="520px";
+    p.innerHTML=`<b>Tritt der Rangliste bei</b><p class="note" style="margin:6px 0 12px">Wähle einen Spielernamen. Er erscheint auch im Live-Feed, wenn du etwas sehr Seltenes backst.</p><form class="codebox" id="joinForm"><input class="tin" id="lbName" maxlength="18" placeholder="Spielername" autocomplete="off" aria-label="Spielername"><button class="btn pri" type="submit">Beitreten</button></form>`;
+    body.appendChild(p);p.querySelector("#lbName").value=S.lb.name;
+    p.querySelector("#joinForm").onsubmit=e=>{e.preventDefault();const n=p.querySelector("#lbName").value.trim().replace(/\s+/g," ");if(n.length<2){toast("Name zu kurz","Mindestens 2 Zeichen.",true);return}S.lb.name=n.slice(0,18);S.lb.joined=true;dirty=true;lbReport(true).then(()=>fetchLB(true));toast("Beigetreten","Willkommen in der Rangliste, "+S.lb.name+".");renderLB()};
+    const h=document.createElement("h3");h.style.marginTop="22px";h.textContent="Aktuelle Rangliste";body.appendChild(h);
+  }
+  const rows=ranked();
+  if(S.lb.joined){
+    const me=rows.find(r=>r.id===UID);
+    const bar=document.createElement("div");
+    bar.innerHTML=`<div class="row-between" style="flex-wrap:wrap"><div><span class="note">Du spielst als</span> <b class="myname"></b></div><div style="display:flex;gap:8px"><button class="btn" id="lbSync">Jetzt synchronisieren</button><button class="btn" id="lbRename">Name ändern</button></div></div>
+      <div class="lbme">${CATS.map(([k,l])=>`<div class="stat"><small>${l}</small><b>${me?(k==="total"?fmt(me.score):"#"+me["rk_"+k]):"–"}</b></div>`).join("")}</div>`;
+    bar.querySelector(".myname").textContent=S.lb.name;
+    bar.querySelector("#lbSync").onclick=()=>{lbReport(true).then(()=>fetchLB(true));cloudSave(true);toast("Synchronisiert","Dein Stand ist gemeldet.",true)};
+    bar.querySelector("#lbRename").onclick=()=>{S.lb.joined=false;renderLB()};
+    body.appendChild(bar);
+  }
+  const seg=document.createElement("div");seg.className="seg";seg.style.marginBottom="12px";
+  seg.innerHTML=CATS.map(([k,l])=>`<button data-cat="${k}" aria-pressed="${lbCat===k}">${l}</button>`).join("");
+  seg.onclick=e=>{const b=e.target.closest("[data-cat]");if(b){lbCat=b.dataset.cat;renderLB()}};
+  body.appendChild(seg);
+  const list=document.createElement("div");
+  const key=lbCat==="total"?null:lbCat==="disc"?"discPeak":lbCat;
+  const sorted=[...rows].sort(key?(a,b)=>(b[key]||0)-(a[key]||0):(a,b)=>a.score-b.score||(b.bestN||0)-(a.bestN||0)||(b.rolls||0)-(a.rolls||0));
+  if(!sorted.length)list.innerHTML=`<p class="note">Noch keine Einträge. Sei der Erste!</p>`;
+  sorted.slice(0,50).forEach((r,i)=>{
+    const d=document.createElement("div");d.className="lbrow"+(r.id===UID?" me":"");
+    const b=r.bestK?fromKey(r.bestK):null,au=r.aura?fromKey(r.aura):null;
+    let v;switch(lbCat){case"total":v=fmt(r.score)+" Pkt.";break;case"disc":v=`${r.disc}/${TOTAL}${r.discPeak>r.disc?` · Peak ${r.discPeak}`:""}`;break;case"rolls":v=fmt(r.rolls);break;case"shinies":v=fmt(r.shinies);break;case"bestN":v=r.bestN?odds(r.bestN):"–";break;default:v=fmt(r.rebirths)}
+    d.innerHTML=`<span class="rk">${i+1}</span><div style="min-width:0;display:flex;gap:10px;align-items:center">${au?`<span style="width:30px;height:30px;flex:none">${ckHTML(au.c,au.v)}</span>`:""}<div style="min-width:0"><div class="nm"></div><div class="sub">${b?esc(b.c.n)+(b.v?" ("+VAR[b.v].n.toLowerCase()+")":""):"–"} · ${fmt(r.rolls)} Rolls · ${r.rebirths} Rebirths</div></div></div><span class="v">${v}</span>`;
+    const au2=d.querySelector(".ck");if(au2){au2.style.width="30px";au2.style.height="30px"}
+    d.querySelector(".nm").textContent=(r.name||"Unbenannt")+(r.id===UID?" (du)":"");
+    list.appendChild(d);
+  });
+  body.appendChild(list);
+  const n=document.createElement("p");n.className="note";n.style.marginTop="12px";n.textContent="Entdeckungen zählen mit deinem Höchststand (Peak), damit ein Rebirth dich nicht zurückwirft. Dein Stand wird alle 5 Minuten gemeldet, die Liste lädt beim Öffnen neu.";body.appendChild(n);
+}
+/* Firebase-Adapter: gleiche Schnittstelle wie vorher (doc/collection/onSnapshot) */
+function makeDB(F,fs){
+  const wrapSnap=s=>({docs:s.docs.map(d=>({id:d.id,data:()=>d.data()})),docChanges:()=>s.docChanges().map(c=>({type:c.type,doc:{id:c.doc.id,data:()=>c.doc.data()}}))});
+  return{
+    doc(path){const ref=F.doc(fs,...path.split("/"));return{set:d=>F.setDoc(ref,d),del:()=>F.deleteDoc(ref),get:async()=>{const s=await F.getDoc(ref);return{exists:s.exists(),data:()=>s.data()}}}},
+    collection(name){const cons=[];const q={orderBy(f,d){cons.push(F.orderBy(f,d||"asc"));return q},limit(n){cons.push(F.limit(n));return q},
+      async get(){return wrapSnap(await F.getDocs(F.query(F.collection(fs,name),...cons)))},
+      onSnapshot(next,err){return F.onSnapshot(F.query(F.collection(fs,name),...cons),s=>next(wrapSnap(s)),e=>{console.warn(e);if(err)err(e)})}};return q}
+  };
+}
+/* ===== Konto & Geräte-Sync ===== */
+let FB=null,ACC=null,lastPull=0,lastFeedToast=0;
+const isGoogle=()=>!!(ACC&&!ACC.isAnonymous);
+function loadState(obj){S=migrate(merge(fresh(),obj));S.lastSeen=Date.now();applySettings();renderAll();stageFromLog();renderAura();renderResult(null);$("trayRoll").textContent="#"+fmt(S.rolls);save()}
+async function pullCloud(boot){
+  if(!DB||!UID)return;lastPull=Date.now();
+  try{const snap=await DB.doc(`saves/${UID}`).get();if(!snap.exists)return;const d=snap.data();
+    if(d&&d.json&&d.at>(S.savedAt||0)+5000){if(busy||auto||cutOpen)return;loadState(JSON.parse(d.json));lastCloud=Date.now();lastUpAt=S.savedAt;toast("Spielstand synchronisiert","Neuerer Stand von einem anderen Gerät geladen.",true)}}catch(e){}
+}
+function renderAccNote(){$("cloudNote").textContent=isGoogle()?" und mit deinem Google-Konto synchronisiert":DB?" und online gesichert":""}
+const saveSummary=o=>{const a=o.all||{};return`${fmt(a.rolls||0)} Rolls · ${Object.keys(o.disc||{}).length}/${TOTAL} entdeckt · ${fmt(o.rebirths||0)} Rebirths`};
+async function googleLogin(){
+  if(!FB){toast("Nicht verfügbar","Die Online-Funktionen sind gerade nicht erreichbar.",true);return}
+  const{Au,auth}=FB,prov=new Au.GoogleAuthProvider();prov.setCustomParameters({prompt:"select_account"});
+  try{const r=await Au.linkWithPopup(auth.currentUser,prov);ACC=r.user;renderAccNote();await cloudSave(2);lbReport(true);
+    toast("Mit Google verbunden","Dein Spielstand ist jetzt auf jedem Gerät verfügbar, auf dem du dich anmeldest.",true);refreshAccBox()}
+  catch(e){
+    if(e.code==="auth/credential-already-in-use"||e.code==="auth/email-already-in-use"){
+      const cred=Au.GoogleAuthProvider.credentialFromError(e);if(!cred){toast("Anmeldung fehlgeschlagen",e.code,true);return}
+      const oldUid=UID;
+      try{const r=await Au.signInWithCredential(auth,cred);ACC=r.user;UID=r.user.uid}catch(e2){toast("Anmeldung fehlgeschlagen",e2.code||"",true);return}
+      renderAccNote();refreshAccBox();
+      let cloud=null;try{const snap=await DB.doc(`saves/${UID}`).get();if(snap.exists&&snap.data().json)cloud=JSON.parse(snap.data().json)}catch(_){}
+      const done=async keepLocal=>{if(!keepLocal&&cloud){loadState(cloud);lastUpAt=S.savedAt}else await cloudSave(2);lbReport(true);toast("Angemeldet",keepLocal?"Dieser Spielstand ist jetzt in deinem Konto gespeichert.":"Spielstand aus deinem Konto geladen.",true)};
+      if(!cloud)return done(true);
+      if(S.all.rolls<30)return done(false);
+      modal("Welchen Spielstand behalten?",`<p class="note" style="margin:0 0 12px">In deinem Google-Konto gibt es schon einen Spielstand. Wähle, mit welchem du weiterspielst. Der andere wird überschrieben.</p>
+        <div class="cols2"><div class="panel"><b>Aus deinem Konto</b><p class="note" style="margin:6px 0 10px">${saveSummary(cloud)}</p><button class="btn pri" data-a="cloud">Diesen laden</button></div>
+        <div class="panel"><b>Auf diesem Gerät</b><p class="note" style="margin:6px 0 10px">${saveSummary(S)}</p><button class="btn" data-a="local">Diesen behalten</button></div></div>`,(o,close)=>{
+          o.querySelector('[data-a="cloud"]').onclick=()=>{close();done(false)};o.querySelector('[data-a="local"]').onclick=()=>{close();done(true)};
+          o.querySelector(".x").onclick=()=>{close();done(false)}});
+    }else if(e.code==="auth/popup-closed-by-user"||e.code==="auth/cancelled-popup-request"){}
+    else if(e.code==="auth/popup-blocked")toast("Popup blockiert","Erlaube Popups für diese Seite und versuch es nochmal.",true);
+    else if(e.code==="auth/operation-not-allowed")toast("Google-Anmeldung nicht aktiviert","In Firebase unter Authentication die Anmeldemethode Google einschalten.",true);
+    else if(e.code==="auth/unauthorized-domain")toast("Domain nicht freigegeben","Diese Domain in Firebase unter Autorisierte Domains eintragen.",true);
+    else toast("Anmeldung fehlgeschlagen",e.code||String(e),true);
+  }
+}
+async function googleLogout(){if(!FB)return;const{Au,auth}=FB;await cloudSave(true);try{await Au.signOut(auth);const r=await Au.signInAnonymously(auth);ACC=r.user;UID=r.user.uid;S.lb.joined=false;dirty=true;renderAccNote();refreshAccBox();toast("Abgemeldet","Dein Spielstand bleibt auf diesem Gerät. Zum Synchronisieren wieder anmelden.",true)}catch(e){toast("Abmelden fehlgeschlagen",e.code||"",true)}}
+function exportCode(){const o=JSON.parse(JSON.stringify(S));o.log=[];return"CRNG2:"+btoa(unescape(encodeURIComponent(JSON.stringify(o))))}
+function importCode(txt){txt=String(txt||"").trim();if(!txt.startsWith("CRNG2:"))throw new Error("format");const o=JSON.parse(decodeURIComponent(escape(atob(txt.slice(6)))));if(!o||typeof o!=="object"||!o.all)throw new Error("format");return o}
+let refreshAccBox=()=>{};
+function accountHTML(){
+  const g=isGoogle();const who=g?esc(ACC.email||ACC.displayName||"Google-Konto"):"";
+  return`<div id="accBox">${!FB?`<p class="note" style="margin:6px 0">Die Online-Anmeldung ist gerade nicht verfügbar. Nutze den Spielstand-Code.</p>`:
+    g?`<div class="setrow"><div class="l"><b>Angemeldet als ${who}</b><span>Dein Spielstand wird automatisch zwischen allen Geräten synchronisiert, auf denen du angemeldet bist.</span></div></div>
+       <div class="btnrow" style="justify-content:flex-start"><button class="btn pri" data-acc="sync">Jetzt synchronisieren</button><button class="btn" data-acc="logout">Abmelden</button></div>`
+     :`<div class="setrow"><div class="l"><b>Mit Google anmelden</b><span>Dann spielst du auf jedem Gerät mit demselben Spielstand weiter. Einfach auf dem anderen Gerät ebenfalls anmelden.</span></div></div>
+       <div class="btnrow" style="justify-content:flex-start"><button class="btn pri" data-acc="login">Mit Google anmelden</button></div>`}
+   <div class="setrow"><div class="l"><b>Spielstand-Code</b><span>Ohne Konto: Code kopieren und auf dem anderen Gerät hier einfügen.</span></div></div>
+   <div class="btnrow" style="justify-content:flex-start;margin-top:4px"><button class="btn" data-acc="copy">Code kopieren</button><button class="btn" data-acc="paste">Code einfügen</button></div>
+   <div id="codeArea" style="margin-top:10px"></div></div>`;
+}
+function wireAccount(o,close){
+  refreshAccBox=()=>{const b=o.querySelector("#accBox");if(b){b.outerHTML=accountHTML();wire()}};
+  const wire=()=>{o.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{const a=b.dataset.acc,area=o.querySelector("#codeArea");
+    if(a==="login")googleLogin();
+    else if(a==="logout")googleLogout();
+    else if(a==="sync"){await cloudSave(true);await pullCloud();lbReport(true);toast("Synchronisiert","Dein Spielstand ist aktuell.",true)}
+    else if(a==="copy"){const code=exportCode();area.innerHTML=`<textarea class="tin" id="codeOut" readonly style="width:100%;height:90px;font-family:var(--mono);font-size:11px"></textarea><p class="note" style="margin:6px 0 0">Der Code enthält deinen kompletten Spielstand. Gib ihn nicht weiter, sonst kann jemand deinen Stand übernehmen.</p>`;
+      const ta=area.querySelector("#codeOut");ta.value=code;try{await navigator.clipboard.writeText(code);toast("Kopiert","Code in der Zwischenablage.",true)}catch(e){ta.focus();ta.select();toast("Code markiert","Jetzt mit Strg+C oder Kopieren übernehmen.",true)}}
+    else if(a==="paste"){area.innerHTML=`<textarea class="tin" id="codeIn2" placeholder="CRNG2:…" style="width:100%;height:90px;font-family:var(--mono);font-size:11px"></textarea><div class="btnrow" style="justify-content:flex-start;margin-top:6px"><button class="btn pri" id="codeLoad">Spielstand laden</button></div>`;
+      area.querySelector("#codeLoad").onclick=()=>{let o2;try{o2=importCode(area.querySelector("#codeIn2").value)}catch(e){toast("Ungültiger Code","Bitte den kompletten Code einfügen, er beginnt mit CRNG2:",true);return}
+        close();confirmBox("Spielstand ersetzen?",`Der Code enthält: ${saveSummary(o2)}.<br>Dein aktueller Stand auf diesem Gerät (${saveSummary(S)}) wird überschrieben.`,"Laden",()=>{loadState(o2);cloudSave(2);lbReport(true);toast("Spielstand geladen","Viel Spaß beim Weiterbacken.",true)},true)}}
+  })};wire();
+}
+/* Rangliste sparsam laden: nur beim Öffnen des Tabs, höchstens alle 2 Minuten (Firestore-Lesekontingent) */
+let lbFetchedAt=0,lbFetching=false;
+async function fetchLB(force){if(!DB||lbFetching)return;if(!force&&Date.now()-lbFetchedAt<120000)return;lbFetching=true;
+  try{const snap=await DB.collection("scores").orderBy("rolls","desc").limit(100).get();
+    LB=snap.docs.map(d=>{const x=d.data()||{};return{id:d.id,name:String(x.name||"").slice(0,18),disc:N0(x.disc),discPeak:N0(x.discPeak),rolls:N0(x.rolls),shinies:N0(x.shinies),bestN:N0(x.bestN),bestK:safeKey(x.bestK),aura:safeKey(x.aura),rebirths:N0(x.rebirths)}});
+    lbState="on";lbFetchedAt=Date.now()}catch(e){console.warn(e);if(!LB.length)lbState="off"}
+  lbFetching=false;if(tab==="lb")renderLB()}
+async function initCloud(){
+  try{
+    const cfg=window.FIREBASE_CONFIG;
+    if(!cfg||!cfg.apiKey||/^DEIN/.test(cfg.apiKey)){lbState="off";if(tab==="lb")renderLB();return}
+    const base="https://www.gstatic.com/firebasejs/10.12.2/";
+    const [A,Au,F]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-auth.js"),import(base+"firebase-firestore.js")]);
+    const app=A.initializeApp(cfg),auth=Au.getAuth(app),fs=F.getFirestore(app);
+    await auth.authStateReady();
+    let user=auth.currentUser;if(!user)user=(await Au.signInAnonymously(auth)).user;
+    UID=user.uid;ACC=user;FB={Au,auth};DB=makeDB(F,fs);
+    await pullCloud(true);
+    renderAccNote();
+    fetchLB(true);
+    DB.collection("feed").orderBy("at","desc").limit(15).onSnapshot(snap=>{
+      FEED=snap.docs.map(d=>{const x=d.data()||{};return{id:d.id,uid:String(x.uid||""),name:String(x.name||"").slice(0,18),k:safeKey(x.k),at:N0(x.at)}}).filter(f=>f.k&&f.at<=Date.now()+60000);
+      tickerStep();
+      for(const ch of snap.docChanges()){if(ch.type==="removed")continue;const x=ch.doc.data()||{};const k=safeKey(x.k);if(!k||N0(x.at)<BOOT||String(x.uid)===UID||!S.set.feedToasts)continue;
+        if(valKey(k)<1e6||Date.now()-lastFeedToast<30000)continue;lastFeedToast=Date.now();
+        const{c,v}=fromKey(k);toast("Live: "+(String(x.name||"").slice(0,18)||"Ein Bäcker"),`hat ${c.n}${v?" ("+VAR[v].n.toLowerCase()+")":""} gebacken · ${odds(valOf(c,v))}`)}
+    },()=>{});
+    setTimeout(()=>{if(lbState==="loading"){lbState="on";if(tab==="lb")renderLB()}},6000);
+    renderTicker();lbReport(true);
+  }catch(e){console.warn("Firebase nicht verfügbar:",e);lbState="off";if(tab==="lb")renderLB()}
+}
+
+/* ================= Offline baking ================= */
+function offlineBake(){
+  if(!S.lastSeen)return;const gap=Date.now()-S.lastSeen;if(gap<120000)return;
+  const cap=(2+S.tal.offline)*3600000,t=Math.min(gap,cap),eff=.1+S.tal.offline*.1;
+  const n=Math.min(30000,Math.floor(t/rollDelay()*eff));if(n<1)return;
+  let cookies=0,news=[],crumbs0=S.crumbs,bestK=null;
+  for(let i=0;i<n;i++){S.rolls++;S.all.rolls++;const out=[];for(let k=0;k<perRoll();k++){const p=pick(capL(luckMult()),NOEV);out.push({c:p.c,v:rollVar(NOEV)})}
+    apply({out,ev:NOEV},true);for(const r of out){cookies++;const k=keyOf(r.c,r.v);if(r.isNew)news.push(k);if(!bestK||valKey(k)>valKey(bestK))bestK=k}}
+  const got=S.crumbs-crumbs0;dirty=true;
+  const h=Math.floor(t/3600000),m=Math.floor(t/60000)%60;
+  const b=fromKey(bestK);
+  setTimeout(()=>modal("Willkommen zurück",`<div class="offsum"><span class="note">Dein Ofen hat ${h?h+" h ":""}${m} min weitergebacken${gap>cap?" (Maximum erreicht)":""}.</span><span class="big">${fmt(cookies)} Kekse</span>
+    <span>+${fmt(got)} Krümel · ${news.length} neue Sammelbuch-Einträge</span>
+    <span>Bester Fund: <b style="color:${TIERS[b.c.t].c}">${esc(b.c.n)}${b.v?" ("+VAR[b.v].n.toLowerCase()+")":""}</b> · ${odds(valOf(b.c,b.v))}</span>
+    ${news.length?`<div class="offrow">${news.slice(0,24).map(k=>{const x=fromKey(k);return ckHTML(x.c,x.v)}).join("")}</div>`:""}
+    <p class="note" style="margin:6px 0 0">Offline backt der Ofen mit ${pct(eff)} Tempo und ohne Events. Das Talent Nachtschicht verbessert beides.</p></div>
+    <div class="btnrow"><button class="btn pri" data-a="ok">Weiterbacken</button></div>`,(o,close)=>{o.querySelector('[data-a="ok"]').onclick=close}),300);
+}
+
+/* ================= Events wiring ================= */
+$("rollBtn").onclick=()=>{if(auto)return;roll()};
+$("autoBtn").onclick=()=>{auto?stopAuto():startAuto()};
+$("modeSeg").onclick=e=>{const b=e.target.closest("[data-mode]");if(!b)return;S.set.mode=b.dataset.mode;stopAuto();syncMode();dirty=true};
+function syncMode(){document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===S.set.mode));$("xCount").hidden=S.set.mode!=="x";updateAutoBtn()}
+$("xCount").oninput=()=>{if(!auto)updateAutoBtn()};
+$("logMin").onchange=renderLog;
+$("luckRange").oninput=e=>{const full=luckMult(evMods()),p=+e.target.value;S.set.luckCap=p>=1000?0:Math.max(1,Math.round(Math.pow(full,p/1000)*100)/100);dirty=true;renderLuckCtl();renderTop()};
+$("luckRange").onchange=()=>{renderNextFind();renderEffects()};
+$("luckFull").onclick=()=>setLuckCap(0);
+document.querySelector(".tabs").onclick=e=>{const b=e.target.closest(".tab");if(b)showTab(b.dataset.tab)};
+$("btnSettings").onclick=openSettings;$("footSync").onclick=()=>{openSettings();setTimeout(()=>{const b=document.getElementById("accBox");if(b)b.scrollIntoView({block:"center"})},50)};
+$("quests").onclick=e=>{const b=e.target.closest("[data-claim]");if(b)claimQuest(+b.dataset.claim)};
+$("invPots").onclick=e=>{const b=e.target.closest("[data-use]");if(b)usePot(b.dataset.use)};
+$("invList").onclick=e=>{const b=e.target.closest("[data-sell]");if(!b)return;const v=sellKey(b.dataset.sell);if(v){toast("Verkauft",`+${fmt(v)} Krümel`);dirty=true;renderAll()}};
+["invTier","invSort","invVar"].forEach(id=>$(id).onchange=renderInv);$("invSearch").oninput=renderInv;
+$("invTier").innerHTML=`<option value="all">Alle Seltenheiten</option>`+TIERS.map((T,t)=>`<option value="${t}">${T.n}</option>`).join("");
+$("invVar").innerHTML=`<option value="all">Alle Varianten</option>`+VKEYS.map(v=>`<option value="${v}">${VAR[v].n}</option>`).join("");
+$("sellDupes").onclick=()=>{let v=0;for(const k in S.inv){const x=fromKey(k);if(x.c.t<=3&&(x.v===""||x.v==="b"||x.v==="r"))v+=sellKey(k)}if(v){toast("Duplikate verkauft",`+${fmt(v)} Krümel`,true);dirty=true;renderAll()}else toast("Nichts zu verkaufen","Keine Duplikate bis Episch.",true)};
+$("bookSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(!b)return;bookView=b.dataset.v;renderBook()};
+$("book").onclick=e=>{const b=e.target.closest("[data-ck]");if(!b)return;const{c,v}=fromKey(b.dataset.ck);cookieDetail(c,v)};
+$("recipes").onclick=e=>{const c=e.target.closest("[data-craft]");if(c)return craft(c.dataset.craft);const q=e.target.closest("[data-equip]");if(q)equip(q.dataset.equip)};
+$("auraPick").onclick=e=>{const b=e.target.closest("[data-aura]");if(b)setAura(b.dataset.aura)};
+$("shopUp").onclick=e=>{const b=e.target.closest("[data-buyup]");if(!b)return;const u=UPG.find(u=>u.k===b.dataset.buyup),c=u.cost(S.up[u.k]);if(S.crumbs<c||S.up[u.k]>=u.max)return;S.crumbs-=c;S.up[u.k]++;toast(u.n+" gekauft",`Stufe ${S.up[u.k]}`);dirty=true;checkAch();renderAll()};
+$("shopPot").onclick=e=>{const b=e.target.closest("[data-buypot]");if(!b)return;const p=POT.find(p=>p.k===b.dataset.buypot);if(S.crumbs<p.cost)return;S.crumbs-=p.cost;S.pots[p.k]=(S.pots[p.k]||0)+1;toast(p.n+" gekauft","Liegt jetzt im Inventar.");dirty=true;renderAll()};
+$("codeForm").onsubmit=e=>{e.preventDefault();const c=$("codeIn").value.trim().toUpperCase();if(!c)return;const def=CODES[c];
+  if(!def){toast("Unbekannter Code","Prüf die Schreibweise.",true);return}if(S.codes[c]){toast("Schon eingelöst","Jeder Code funktioniert einmal.",true);return}
+  S.codes[c]=1;def.f(S);$("codeIn").value="";toast("Code eingelöst",def.txt,true);dirty=true;renderAll()};
+$("rbBtn").onclick=()=>{const g=rebirthGain();if(g<=0)return;confirmBox("Rebirth durchführen?",`Du bekommst <b style="color:var(--caramel)">${g} Talentpunkte</b>. Rolls, Inventar, Sammelbuch, Krümel, Upgrades und Tränke werden zurückgesetzt. Talente, Ausrüstung, Aura und Achievements bleiben. Das lässt sich nicht rückgängig machen.`,"Jetzt Rebirth",doRebirth)};
+$("talGrid").onclick=e=>{const b=e.target.closest("[data-tal]");if(!b)return;const t=TAL.find(x=>x.k===b.dataset.tal);if(S.tp<t.cost||S.tal[t.k]>=t.max)return;S.tp-=t.cost;S.tal[t.k]++;dirty=true;checkAch();renderAll()};
+$("talReset").onclick=()=>confirmBox("Talente zurücksetzen?","Alle vergebenen Punkte kommen zurück und du kannst sie neu verteilen. Kostenlos.","Zurücksetzen",()=>{S.tp+=talentSpent();for(const t of TAL)S.tal[t.k]=0;dirty=true;renderAll()});
+document.addEventListener("keydown",e=>{if((e.code==="Space"||e.key===" ")&&!e.repeat&&tab==="roll"&&!/INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)&&!document.querySelector(".overlay")&&!cutOpen){e.preventDefault();if(!auto){$("rollBtn").classList.add("press");setTimeout(()=>$("rollBtn").classList.remove("press"),100);roll()}}});
+
+/* ================= Loops ================= */
+let lastTick=Date.now();
+setInterval(()=>{
+  const now=Date.now(),dt=Math.min(5000,now-lastTick);lastTick=now;
+  if(document.visibilityState==="visible"){S.all.playMs+=dt;let ch=false;for(const k in S.eff)if(S.eff[k]>0){S.eff[k]=Math.max(0,S.eff[k]-dt);ch=true;if(S.eff[k]===0)toast("Effekt abgelaufen",({luck:"Glückstrank",luck2:"Großer Glückstrank",shiny:"Schillertrank",turbo:"Turbotrank"})[k])}
+    if(ch)renderTop()}
+  if(S.pev&&S.pev.until<=now)S.pev=null;
+  while(rpsBuf.length&&rpsBuf[0]<now-5000)rpsBuf.shift();
+  const rps=rpsBuf.length/5;$("mRps").textContent=f2(rps);$("mRph").textContent=fmt(rps*3600);
+  renderEventBar();
+  if(tab==="roll"){renderEffects();renderLuckCtl();if(S.q.day!==dayKey())renderQuests();else qResetText()}
+},1000);
+setInterval(()=>{S.lastSeen=Date.now();if(dirty){save();dirty=false}lbReport(false);cloudSave(false);flushFeed()},5000);
+setInterval(()=>{if(DB&&document.visibilityState==="visible")tickerStep()},1000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){save();lbReport(true);if(isGoogle())cloudSave(true)}else if(isGoogle()&&Date.now()-lastPull>15000)pullCloud()});
+window.addEventListener("pagehide",save);
+
+/* ================= Boot ================= */
+$("xCount").value=S.set.x;
+ensureQuests();
+applySettings();syncMode();
+offlineBake();
+stageFromLog();$("trayRoll").textContent="#"+fmt(S.rolls);
+renderResult(null);renderAura();renderEventBar();
+let startTab="roll";try{startTab=localStorage.getItem(KEY+"_tab")||"roll"}catch(e){}
+if(location.hash&&TABS.includes(location.hash.slice(1)))startTab=location.hash.slice(1);
+showTab(TABS.includes(startTab)?startTab:"roll");
+renderTop();checkAch();save();
+initCloud();
+})();
+</script>
+</body>
+</html>
