@@ -2,6 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<!-- Canopy (canopybase.pages.dev): Spielstand mit der Canopy ID abgleichen, wenn das Spiel im Canopy-Player läuft.
+     Direkt auf dieser Seite: nur ein kleiner Knopf "In Canopy ID übertragen". Muss vor den Spiel-Skripten stehen. -->
+<script src="https://canopybase.pages.dev/sdk/canopy-sdk.js"></script>
+<script src="https://canopybase.pages.dev/sdk/canopy-bridge.js"></script>
+<script>CanopyBridge.init({ game: 'cookie-rng-2', prefixes: ['cookierng2_'], exclude: ['cookierng2_save_v1_tab'], volatile: { cookierng2_save_v1: ['lastSeen', 'savedAt'] } });</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Cookie RNG 2 – rolle seltene Kekse, sammle alle 520 Einträge, backe Ausrüstung und kletter in der Rangliste nach oben.">
 <meta name="theme-color" content="#1b120d">
